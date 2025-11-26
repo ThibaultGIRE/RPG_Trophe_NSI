@@ -31,3 +31,21 @@ class Combat:
         if choix in ['normale', 'spéciale']:
             self.type_attaque = choix
         return self.type_attaque
+    
+class Personnage:
+    def __init__(self, nom, points_de_vie):
+        self.nom = nom
+        self.points_de_vie = points_de_vie
+    
+class Heros(Personnage):
+    def __init__(self, nom, points_de_vie):
+        super().__init__(nom, points_de_vie)
+
+        self.niveau = 1
+        self.experience = 0
+
+class Monstre(Personnage):
+    def __init__(self, nom, points_de_vie):
+        super().__init__(nom, points_de_vie)
+
+        self.nombre_experience = None
