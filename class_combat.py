@@ -20,14 +20,14 @@ class Combat:
         if self.attaquant.points_de_vie <= 0:
             print(f"{self.attaquant.nom} ne peut pas attaquer car il est KO.")
         
-        if self.type_attaque == 'nomale':
-            attaque_normale()
+        if self.type_attaque == 'normale':
+            self.attaque_normale()
 
         if self.type_attaque == 'speciale':
-            attaque_speciale()
+            self.attaque_speciale()
 
     def definir_type_attaque(self):
-        choix = input("Choisissez le type d'attaque (nomale/spéciale) : ").strip().lower()
+        choix = input("Choisissez le type d'attaque (normale/spéciale) : ").strip().lower()
         if choix in ['normale', 'spéciale']:
             self.type_attaque = choix
         return self.type_attaque
