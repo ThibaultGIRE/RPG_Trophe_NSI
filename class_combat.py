@@ -5,32 +5,46 @@ class Combat:
     def __init__(self, attaquant, defenseur):
         self.attaquant = attaquant
         self.defenseur = defenseur
-        self.type_attaque = None
-    
-    def attaque_normale(self):
-        self.defenseur.points_de_vie -= DEGATS_NORMAUX
-        print(f"{self.attaquant.nom} attaque {self.defenseur.nom} avec une attaque normale")
-
-    def attaque_speciale(self):
-        self.defenseur.points_de_vie -= DEGATS_SPECIAUX
-        print(f"{self.attaquant.nom} attaque {self.defenseur.nom} avec une attaque spéciale")
-        
 
     def attaquer(self):
+        attaque = Attaque()
         if self.attaquant.points_de_vie <= 0:
             print(f"{self.attaquant.nom} ne peut pas attaquer car il est KO.")
         
         if self.type_attaque == 'normale':
-            self.attaque_normale()
+            attaque.attaque_normale(self.defenseur)
 
         if self.type_attaque == 'speciale':
-            self.attaque_speciale()
+            attaque.attaque_speciale(self.defenseur)
+
+class Attaque:
+    def __init__(self):
+        self.type_attaque = input("Entrez le type d'attaque (normale/speciale) : ").strip().lower()
+        self.degats = None
 
     def definir_type_attaque(self):
-        choix = input("Choisissez le type d'attaque (normale/spéciale) : ").strip().lower()
-        if choix in ['normale', 'spéciale']:
-            self.type_attaque = choix
-        return self.type_attaque
+        if self.type_attaque not in ['normale', 'speciale']:
+            raise ValueError("Type d'attaque invalide. Choisissez normale ou speciale")
+        
+        elif self.type_attaque == 'normale':
+            self.type_attaque = 'normale'
+
+        elif self.type_attaque == 'speciale':
+            self.type_attaqie = 'speciale'
+
+    def definir_degats(self):
+        if self.type_attaque == 'normale':
+            self.degats = DEGATS_NORMAUX
+        elif self.type_attaque == 'speciale':
+            self.degats = DEGATS_SPECIAUX
+
+    def attaque_normale(self, cible):
+        cible.points_de_vie -= self.degats
+        print(f"Attaque normale inflige {self.degats} points de dégâts à {cible.nom}")
+
+    def attaque_speciale(self, cible):
+        cible.points_de_vie -= DEGATS_SPECIAUX
+        print(f"Attaque spéciale inflige {DEGATS_SPECIAUX} points de dégâts à {cible.nom}")
     
 class Personnage:
     def __init__(self, nom, points_de_vie):
