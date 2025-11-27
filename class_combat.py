@@ -47,19 +47,26 @@ class Attaque:
         print(f"Attaque spéciale inflige {DEGATS_SPECIAUX} points de dégâts à {cible.nom}")
     
 class Personnage:
-    def __init__(self, nom, points_de_vie):
+    def __init__(self, nom, points_de_vie, niveau):
         self.nom = nom
         self.points_de_vie = points_de_vie
+        self.niveau = niveau
     
 class Heros(Personnage):
-    def __init__(self, nom, points_de_vie):
-        super().__init__(nom, points_de_vie)
+    def __init__(self, nom, points_de_vie, niveau):
+        super().__init__(nom, points_de_vie, niveau = 1)
 
         self.niveau = 1
         self.experience = 0
 
-class Monstre(Personnage):
-    def __init__(self, nom, points_de_vie):
-        super().__init__(nom, points_de_vie)
+    def monter_niveau(self):
+        if self.experience >= 100:
+            self.niveau += 1
+            self.experience -= 100
+            print(f"{self.nom} est passé au niveau {self.niveau} !")
 
-        self.nombre_experience = None
+class Monstre(Personnage):
+    def __init__(self, nom, points_de_vie, niveau):
+        super().__init__(nom, points_de_vie, niveau)
+
+        self.points_experience = None
