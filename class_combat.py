@@ -23,6 +23,12 @@ class Personnage:
         self.points_de_vie -= damage
         if self.points_de_vie < 0:
             self.points_de_vie = 0
+
+    def heal(self, amount):
+        '''Soigne le personnage d'une certaine quantité'''
+        self.points_de_vie += amount
+        if self.points_de_vie > self.pv_max:
+            self.points_de_vie = self.pv_max
     
     def is_alive(self):
         '''Retourne True si le personnage est en vie, False sinon'''
