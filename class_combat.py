@@ -31,3 +31,37 @@ class Personnage:
     def do_attack(self, target, attack_obj):
         '''Faire une attaque'''
         pass  # À implémenter
+
+class PlayerCharacter(Personnage):
+    def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks, healer, special_attack):
+        super().__init__(nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks)
+ 
+        self.is_healer = healer
+        self.special_attack = special_attack
+        self.inventory = []
+
+    def use_special(self, target):
+        pass
+
+    def can_double_attack(self, target):
+        pass
+
+class Enemy(Personnage):
+    def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks):
+        super().__init__(nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks)
+
+    def decide_action(self, map, player):
+        pass
+
+    def choose_target(self, players):
+        pass
+
+class Attack:
+    def __init__(self, name, precision, special_effect, base_damage):
+        self.name = name
+        self.precision = precision
+        self.special_effect = special_effect
+        self.base_damage = base_damage
+
+    def calculate_damage(self, enemy, target):
+        pass
