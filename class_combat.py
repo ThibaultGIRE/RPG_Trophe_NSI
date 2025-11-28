@@ -1,72 +1,33 @@
-DEGATS_NORMAUX = 10
-DEGATS_SPECIAUX = 25
-
-class Combat:
-    def __init__(self, attaquant, defenseur):
-        self.attaquant = attaquant
-        self.defenseur = defenseur
-
-    def attaquer(self):
-        attaque = Attaque()
-        if self.attaquant.points_de_vie <= 0:
-            print(f"{self.attaquant.nom} ne peut pas attaquer car il est KO.")
-        
-        if self.type_attaque == 'normale':
-            attaque.attaque_normale(self.defenseur)
-
-        if self.type_attaque == 'speciale':
-            attaque.attaque_speciale(self.defenseur)
-
-class Attaque:
-    def __init__(self):
-        self.type_attaque = input("Entrez le type d'attaque (normale/speciale) : ").strip().lower()
-        self.degats = None
-
-    def definir_type_attaque(self):
-        if self.type_attaque not in ['normale', 'speciale']:
-            raise ValueError("Type d'attaque invalide. Choisissez normale ou speciale")
-        
-        elif self.type_attaque == 'normale':
-            self.type_attaque = 'normale'
-
-        elif self.type_attaque == 'speciale':
-            self.type_attaqie = 'speciale'
-
-    def definir_degats(self):
-        if self.type_attaque == 'normale':
-            self.degats = DEGATS_NORMAUX
-        elif self.type_attaque == 'speciale':
-            self.degats = DEGATS_SPECIAUX
-
-    def attaque_normale(self, cible):
-        cible.points_de_vie -= self.degats
-        print(f"Attaque normale inflige {self.degats} points de dégâts à {cible.nom}")
-
-    def attaque_speciale(self, cible):
-        cible.points_de_vie -= DEGATS_SPECIAUX
-        print(f"Attaque spéciale inflige {DEGATS_SPECIAUX} points de dégâts à {cible.nom}")
-    
 class Personnage:
-    def __init__(self, nom, points_de_vie, niveau):
+    def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks):
+        '''Initialisation du personnage. Notes : position est un tuple (x,y) et attacks est une liste. Différencier attacks de attack'''
         self.nom = nom
         self.points_de_vie = points_de_vie
         self.niveau = niveau
+        self.xp = 0
+        self.pv = pv
+        self.pv_max = pv_max
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.position = position #tuple (x,y)
+        self.attacks = attacks #liste 
+
+    def move(self, dx, dy):
+        '''Déplace le personnage de dx en x et dy en y'''
+        x, y = self.position
+        self.position = (x + dx, y + dy)
+
+    def take_damage(self, damage):
+        '''Réduit les points de vie du personnage en fonction des dégâts reçus'''
+        self.points_de_vie -= damage
+        if self.points_de_vie < 0:
+            self.points_de_vie = 0
     
-class Heros(Personnage):
-    def __init__(self, nom, points_de_vie, niveau):
-        super().__init__(nom, points_de_vie, niveau = 1)
-
-        self.niveau = 1
-        self.experience = 0
-
-    def monter_niveau(self):
-        if self.experience >= 100:
-            self.niveau += 1
-            self.experience -= 100
-            print(f"{self.nom} est passé au niveau {self.niveau} !")
-
-class Monstre(Personnage):
-    def __init__(self, nom, points_de_vie, niveau):
-        super().__init__(nom, points_de_vie, niveau)
-
-        self.points_experience = None
+    def is_alive(self):
+        '''Retourne True si le personnage est en vie, False sinon'''
+        return self.points_de_vie > 0
+    
+    def do_attack(self, target, attack_obj):
+        '''Faire une attaque'''
+        pass  # À implémenter
