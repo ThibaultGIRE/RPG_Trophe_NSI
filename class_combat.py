@@ -38,6 +38,11 @@ class Personnage:
         '''Faire une attaque'''
         pass  # À implémenter
 
+    def is_in_range(self, target, attack_obj):
+        '''Vérifie si la cible est dans la portée de l'attaque'''
+        distance = abs(self.position[0] - target.position[0]) +abs(self.position[1] - target.position[1])
+        return distance <= attack_obj.range
+
 class PlayerCharacter(Personnage):
     def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks, healer, special_attack):
         super().__init__(nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks)
