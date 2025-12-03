@@ -37,26 +37,51 @@ class Personnage:
         self.position = (x + dx, y + dy)
 
     def take_damage(self, damage):
-        '''Réduit les points de vie du personnage en fonction des dégâts reçus'''
+        """Take of damage to the character's hp
+
+        Args:
+            damage (int): number of damage to take of the character's hp
+        """
         self.hp -= damage
         if self.hp < 0:
             self.hp = 0
 
     def heal(self, amount):
-        '''Soigne le personnage d'une certaine quantité'''
+        """Heal the character 
+
+        Args:
+            amount (int): amount of hp ti heal
+        """
         self.hp += amount
         if self.hp > self.hp_max:
             self.hp = self.hp_max
     
     def is_alive(self):
-        '''Retourne True si le personnage est en vie, False sinon'''
+        """Check if the character is alive
+
+        Returns:
+            bool: True if the character is alive, False otherwise
+        """
         return self.hp > 0
     
     def do_attack(self, target, attack_obj):
-        '''Faire une attaque'''
+        """_summary_
+
+        Args:
+            target (_type_): _description_
+            attack_obj (_type_): _description_
+        """
         pass  # À implémenter
 
     def is_in_range(self, target, attack_obj):
-        '''Vérifie si la cible est dans la portée de l'attaque'''
+        """_summary_
+
+        Args:
+            target (_type_): _description_
+            attack_obj (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         distance = abs(self.position[0] - target.position[0]) +abs(self.position[1] - target.position[1])
         return distance <= attack_obj.range
