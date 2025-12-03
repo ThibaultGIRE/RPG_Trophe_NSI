@@ -1,3 +1,5 @@
+from Entities.Attack import Attack
+
 class Personnage:
     def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks):
         '''Initialisation du personnage. Notes : position est un tuple (x,y) et attacks est une liste. Différencier attacks de attack'''
@@ -42,37 +44,3 @@ class Personnage:
         '''Vérifie si la cible est dans la portée de l'attaque'''
         distance = abs(self.position[0] - target.position[0]) +abs(self.position[1] - target.position[1])
         return distance <= attack_obj.range
-
-class PlayerCharacter(Personnage):
-    def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks, healer, special_attack):
-        super().__init__(nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks)
- 
-        self.is_healer = healer
-        self.special_attack = special_attack
-        self.inventory = []
-
-    def use_special(self, target):
-        pass
-
-    def can_double_attack(self, target):
-        pass
-
-class Enemy(Personnage):
-    def __init__(self, nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks):
-        super().__init__(nom, points_de_vie, niveau, pv, pv_max, attack, defense, speed, position, attacks)
-
-    def decide_action(self, map, player):
-        pass
-
-    def choose_target(self, players):
-        pass
-
-class Attack:
-    def __init__(self, name, precision, special_effect, base_damage):
-        self.name = name
-        self.precision = precision
-        self.special_effect = special_effect
-        self.base_damage = base_damage
-
-    def calculate_damage(self, enemy, target):
-        pass
