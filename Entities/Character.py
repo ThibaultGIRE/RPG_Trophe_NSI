@@ -50,7 +50,7 @@ class Personnage:
         """Heal the character 
 
         Args:
-            amount (int): amount of hp ti heal
+            amount (int): amount of hp to heal
         """
         self.hp += amount
         if self.hp > self.hp_max:
