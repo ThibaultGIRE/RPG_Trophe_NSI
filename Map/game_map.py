@@ -67,4 +67,6 @@ class GameMap :
 
         
     def in_attack_range(self, attacker, defender):
-        pass
+        distance = abs(attacker.position[0] - defender.position[0]) + abs(attacker.position[1] - defender.position[1])
+        attack_range = attacker.attacks[0].range if attacker.attacks else 1
+        return distance <= attack_range
