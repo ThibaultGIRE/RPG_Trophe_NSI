@@ -65,23 +65,28 @@ class Personnage:
         return self.hp > 0
     
     def do_attack(self, target, attack_obj):
-        """_summary_
+        """Perform an attack on a target character
 
         Args:
-            target (_type_): _description_
-            attack_obj (_type_): _description_
-        """
-        pass  # À implémenter
-
-    def is_in_range(self, target, attack_obj):
-        """_summary_
-
-        Args:
-            target (_type_): _description_
-            attack_obj (_type_): _description_
+            target (obj): character target by the atttacker
+            attack_obj (obj): attack choosen
 
         Returns:
-            _type_: _description_
+            int: amount of damage dealt
+        """
+        damage = attack_obj.calculate_damage(self, target)
+        target.take_damage(damage)
+        return damage
+
+    def is_in_range(self, target, attack_obj):
+        """Check if the target is in range of the attack
+
+        Args:
+            target (obj): target character
+            attack_obj (obj): attack object
+
+        Returns:
+            bool: True if the target is in range, False otherwise
         """
         distance = abs(self.position[0] - target.position[0]) +abs(self.position[1] - target.position[1])
         return distance <= attack_obj.range
