@@ -1,7 +1,8 @@
 class Attack:
-    def __init__(self, name, precision, special_effect, base_damage):
+    def __init__(self, name, precision, range, special_effect, base_damage):
         self.name = name
         self.precision = precision
+        self.range = range
         self.special_effect = special_effect
         self.base_damage = base_damage
 
