@@ -1,3 +1,6 @@
+from Entities.Character import stat_de_base
+from Entities.Ennemy import Enemy
+
 class Ennemy_Spawner:
     def __init__(self, game_map):
         self.map = game_map
@@ -19,3 +22,8 @@ class Ennemy_Spawner:
             enemies.append(enemy)
 
         return enemies
+    
+    def spawn_enemies(self, enemy_type, level):
+        enemy = Enemy(enemy_type["nom"])
+        return enemy
+    

@@ -1,5 +1,7 @@
 from Entities.Attack import Attack
 
+stat_de_base = {"base enemy":[1, 15, 15, 7, 3, 4], "boss":[1, 40, 40, 15, 10, 10]}
+
 class Personnage:
     def __init__(self, name,level, hp, hp_max, attack, defense, speed, position, attacks):
         '''Initialize a Charadter instance.
