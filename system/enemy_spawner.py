@@ -24,6 +24,7 @@ class Ennemy_Spawner:
         return enemies
     
     def spawn_enemies(self, enemy_type, level):
-        enemy = Enemy(enemy_type["nom"])
+        base_stat_enemy = stat_de_base[enemy_type["type"]]
+        enemy = Enemy(enemy_type["name"], base_stat_enemy["level"], base_stat_enemy["hp"], base_stat_enemy["hp_max"], base_stat_enemy["attack"], base_stat_enemy["defense"], base_stat_enemy["speed"], (0,0), enemy_type["attaques"])
         return enemy
     
