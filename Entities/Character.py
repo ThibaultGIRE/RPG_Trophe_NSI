@@ -68,15 +68,10 @@ class Personnage:
         """Perform an attack on a target character
 
         Args:
-            target (obj): character target by the atttacker
-            attack_obj (obj): attack choosen
-
-        Returns:
-            int: amount of damage dealt
+            target (_type_): _description_
+            attack_obj (_type_): _description_
         """
-        damage = attack_obj.calculate_damage(self, target)
-        target.take_damage(damage)
-        return damage
+        pass  # À implémenter
 
     def is_in_range(self, target, attack_obj):
         """Check if the target is in range of the attack
