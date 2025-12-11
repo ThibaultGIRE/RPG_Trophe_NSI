@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="1">
- <tileset firstgid="1" source="coastal_room_door_tiles.tsx"/>
- <tileset firstgid="217" source="corners.tsx"/>
- <tileset firstgid="219" source="coastal_furnitureset_withshadow.tsx"/>
- <tileset firstgid="387" source="midcentury_modern_furnitureset.tsx"/>
- <tileset firstgid="657" source="kitchen_v1.tsx"/>
- <tileset firstgid="981" source="messy furniture set updated v2.tsx"/>
- <tileset firstgid="1137" source="makeshift_furnitureset.tsx"/>
- <tileset firstgid="1280" source="obstacle.tsx"/>
+ <tileset firstgid="1" source="./tiles/coastal_room_door_tiles.tsx"/>
+ <tileset firstgid="217" source="./tiles/corners.tsx"/>
+ <tileset firstgid="219" source="./tiles/coastal_furnitureset_withshadow.tsx"/>
+ <tileset firstgid="387" source="./tiles/midcentury_modern_furnitureset.tsx"/>
+ <tileset firstgid="657" source="./tiles/kitchen_v1.tsx"/>
+ <tileset firstgid="981" source="./tiles/messy furniture set updated v2.tsx"/>
+ <tileset firstgid="1137" source="./tiles/makeshift_furnitureset.tsx"/>
+ <tileset firstgid="1280" source="./tiles/obstacle.tsx"/>
  <layer id="1" name="Calque de Tuiles 1" width="20" height="15">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
