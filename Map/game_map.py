@@ -1,11 +1,35 @@
+import arcade
+
 class GameMap : 
-    def __init__(self, width, height, tiles, obstacles, entities):
+    def __init__(self, tmx_file_path):
         #Note : entities is a dictionnary with the tuple (x,y) as key. tiles is a matrix, obstacles is a list
-        self.width = width
-        self.height = height
-        self.tiles = tiles
-        self.obstacles = obstacles
-        self.entities = entities
+        self.tile_map = arcade.load_tilemap(
+            tmx_file_path,
+            scaling=1.0, 
+            layer_options={"Obstacles": {"use_spatial_hash": True   }})
+        self.width = self.tile_map.width
+        self.height = self.tile_map.height
+        self.tile_width = self.tile_map.tile_width
+        self.tile_height = self.tile_map.tile_height
+
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        self.entities = {}
+
+        self.obstacles = self._extract_obstacles()
+
+    def _extract_obstacles(self):
+        obstacles = ()
+
+        if "Obstacles" in self.tile_map.name_mapping:
+            obstacles_layer = self.scene["Obstacles"]
+
+            for sprites in obstacles_layer:
+                x = int(sprites.center_x // self.tile_width)
+                y = int(sprites.center_y // self.tile_height)
+                obstacles.append((x, y))
+
+        return obstacles
 
     def is_walkable(self, x, y):
         """Check if the tile at (x,y) is walkable
