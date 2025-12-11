@@ -1,11 +1,35 @@
+import arcade
+
 class GameMap : 
-    def __init__(self, width, height, tiles, obstacles, entities):
+    def __init__(self, tmx_file_path):
         #Note : entities is a dictionnary with the tuple (x,y) as key. tiles is a matrix, obstacles is a list
-        self.width = width
-        self.height = height
-        self.tiles = tiles
-        self.obstacles = obstacles
-        self.entities = entities
+        self.tile_map = arcade.load_tilemap(
+            tmx_file_path,
+            scaling=1.0, 
+            layer_options={"Obstacles": {"use_spatial_hash": True   }})
+        self.width = self.tile_map.width
+        self.height = self.tile_map.height
+        self.tile_width = self.tile_map.tile_width
+        self.tile_height = self.tile_map.tile_height
+
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        self.entities = {}
+
+        self.obstacles = self._extract_obstacles()
+
+    def _extract_obstacles(self):
+        obstacles = ()
+
+        if "Obstacles" in self.tile_map.name_mapping:
+            obstacles_layer = self.scene["Obstacles"]
+
+            for sprites in obstacles_layer:
+                grid_x = int(sprites.center_x // self.tile_width)
+                grid_y = int(sprites.center_y // self.tile_height)
+                obstacles.append((grid_x, grid_y))
+
+        return obstacles
 
     def is_walkable(self, x, y):
         """Check if the tile at (x,y) is walkable
@@ -70,3 +94,13 @@ class GameMap :
         distance = abs(attacker.position[0] - defender.position[0]) + abs(attacker.position[1] - defender.position[1])
         attack_range = attacker.attacks[0].range if attacker.attacks else 1
         return distance <= attack_range
+    
+    def grid_to_pixel(self, pixel_x, pixel_y):
+        grid_x = int(pixel_x // self.tile_width)
+        grid_y = int(pixel_y // self.tile_height)
+        return (grid_x, grid_y)
+    
+    def pixel_to_grid(self, grid_x, grid_y):
+        pixel_x = grid_x * self.tile_width + self.tile_width / 2
+        pixel_y = grid_y * self.tile_height + self.tile_height / 2
+        return (pixel_x, pixel_y)
