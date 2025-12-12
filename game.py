@@ -1,6 +1,6 @@
 import arcade
 from Map.game_map import GameMap
-from System import *
+from system import *
 
 class Game(arcade.Window):
     def __init__(self, tmx_file_path):
@@ -15,4 +15,4 @@ class Game(arcade.Window):
         self.ennemies = []
 
         self.combat_manager = None
-        self.xp_system = 
+        self.xp_system = XPSystem()
