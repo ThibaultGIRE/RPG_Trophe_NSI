@@ -1,6 +1,7 @@
 import arcade
 from Map.game_map import GameMap
 from system import *
+from Entities.Player_character import PlayerCharacter
 
 class Game(arcade.Window):
     def __init__(self, tmx_file_path):
@@ -16,3 +17,30 @@ class Game(arcade.Window):
 
         self.combat_manager = None
         self.xp_system = XPSystem()
+        self.spawner = EnemySpawner(self.map)
+        self.ai = AIControler()
+
+        self.running = True
+        self.in_combat = False
+
+        self.player_sprites = arcade.SpriteList()
+        self.enemy_sprites = arcade.SpriteList()
+
+        self.camera = arcade.Camera(screen_width, screen_height)
+
+        arcade.set_background_color(arcade.color.BLACK)
+
+
+    def create_player_team(self):
+
+        players = [
+            PlayerCharacter("Julie", 1, 12, 5, 6, 5, (0,0), []),
+            PlayerCharacter("Valentin", 1, 15, 5, 7, 5, (0,0), []),
+            PlayerCharacter("Nathan", 1, 15, 4, 7, 5, (0,0), [] ),
+            PlayerCharacter("Thibault", 1, 15, 5, 6, 5, (0,0), [])
+        ]
+
+        for i, player in enumerate(players):
+            self.map.place_character(player, 2 + i, 2)
+        
+        return players 
