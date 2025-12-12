@@ -44,3 +44,18 @@ class Game(arcade.Window):
             self.map.place_character(player, 2 + i, 2)
         
         return players 
+    
+    def on_draw(self):
+        self.clear()
+
+        self.camera.use()
+
+        self.map.scene.draw()
+
+        self.player_sprites.draw()
+
+        self.enemy_sprites.draw()
+
+        self._draw_ui()
+
+        
