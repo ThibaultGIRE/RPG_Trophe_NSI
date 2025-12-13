@@ -5,10 +5,11 @@ class XpSystem:
 
     @staticmethod
     def required_xp(level):
-        return int(150 * level^2,2)
+        # XP required grows quadratically with level
+        return 150 * (level ** 2)
     
     @staticmethod
-    def gain_xp(xp, character):
+    def gain_xp(character, xp):
         requi_xp = XpSystem.required_xp(character.level)
         character.xp += xp
         if character.xp >= requi_xp:

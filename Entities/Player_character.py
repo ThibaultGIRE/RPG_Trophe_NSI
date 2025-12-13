@@ -1,7 +1,7 @@
 from Entities.Character import Personnage
 
 class PlayerCharacter(Personnage):
-    def __init__(self, name, level, hp, hp_max, attack, defense, speed, position, attacks, healer, special_attack):
+    def __init__(self, name, level, hp, hp_max, attack, defense, speed, position, attacks, healer=False, special_attack=None):
         """Initialize a PlayerCharacter instance
 
         Args:

@@ -1,8 +1,8 @@
 import random
 
 class CombatManager:
-    def __init__(self, game_map, players, enemies):
-        self.map = game_map
+    def __init__(self, players, enemies):
+        # game_map removed from constructor to match usage elsewhere
         self.players = players
         self.enemies = enemies
         self.turn_order = []
@@ -49,7 +49,7 @@ class CombatManager:
     
     def check_end_conditions(self):
         if all(not enemy.is_alive() for enemy in self.enemies):
-            return "victiory"
+            return "victory"
         elif all(not player.is_alive() for player in self.players):
             return "defeat"
         return "ongoing"

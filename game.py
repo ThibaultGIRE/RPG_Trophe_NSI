@@ -1,6 +1,8 @@
 import arcade
 from Map.game_map import GameMap
-from system import *
+from system.ai_controller import AIController
+from system.enemy_spawner import Ennemy_Spawner
+from system.xp_system import XpSystem
 from Entities.Player_character import PlayerCharacter
 from Combat.combat_manager import CombatManager
 
@@ -14,12 +16,12 @@ class Game(arcade.Window):
         self.map = GameMap(tmx_file_path)
 
         self.players = self.create_player_team()
-        self.ennemies = []
+        self.enemies = []
 
         self.combat_manager = None
-        self.xp_system = XPSystem()
-        self.spawner = EnemySpawner(self.map)
-        self.ai = AIControler()
+        self.xp_system = XpSystem()
+        self.spawner =  Ennemy_Spawner(self.map)
+        self.ai = AIController()
 
         self.running = True
         self.in_combat = False
@@ -82,16 +84,16 @@ class Game(arcade.Window):
                 arcade.color.GREEN
             )
          
-    def on_uptade(self, delta_time):
+    def on_update(self, delta_time):
         if not self.in_combat and self.detect_enemy_proximity():
             self.start_combat()
 
         if self.in_combat:
             self.combat_turn()
 
-        self._uptade_sprite_positions()
+        self._update_sprite_positions()
 
-    def _uptade_sprite_positions(self):
+    def _update_sprite_positions(self):
         for sprite in self.player_sprites:
             pixel_x, pixel_y = self.map.grid_to_pixel(*sprite.character.position)
             sprite.center_x = pixel_x
@@ -104,7 +106,7 @@ class Game(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         if not self.in_combat:
-            player = self.player[0]
+            player = self.players[0]
             x, y = player.position
 
             if key == arcade.key.UP:
@@ -125,8 +127,8 @@ class Game(arcade.Window):
     
     def start_combat(self):
         self.in_combat = True
-        self.combat_manager = CombatManager(self.players, self.ennemies)
-        self.combat_ùanager.start_turn()
+        self.combat_manager = CombatManager(self.players, self.enemies)
+        self.combat_manager.start_turn()
 
     def combat_turn(self):
         result = self.combat_manager.check_end_conditions()
