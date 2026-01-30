@@ -66,7 +66,7 @@ class Personnage:
         if self.hp < 0:
             self.hp = 0
 
-    def heal(self, amount):
+    def heal_self(self, amount):
         """Heal the character 
 
         Args:
