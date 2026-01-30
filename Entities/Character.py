@@ -1,7 +1,25 @@
 from Entities.Attack import Attack
 
-stat_de_base = {"base enemy":{"level": 1, "hp": 15, "hp_max": 15, "attack": 7, "defense": 3, "speed": 4}, "boss":{"level": 1, "hp": 50, "hp_max": 40, "attack": 15, "defense": 10, "speed": 10}}
-
+stat_de_base = {"base enemy":{"level": 1, 
+                              "hp": 15, 
+                              "hp_max": 15, 
+                              "attack": 7, 
+                              "defense": 3, 
+                              "speed": 3}, 
+                "boss":{"level": 1, 
+                        "hp": 50, 
+                        "hp_max": 40, 
+                        "attack": 15, 
+                        "defense": 10, 
+                        "speed": 10},
+                "player character":{"level": 1,
+                                    "hp": 15,
+                                    "hp max": 15,
+                                    "attack": 5,
+                                    "defense": 5,
+                                    "speed": 5}
+} 
+                
 class Personnage:
     def __init__(self, name, level, hp, hp_max, attack, defense, speed, position, attacks):
         '''Initialize a Charadter instance.
@@ -48,7 +66,7 @@ class Personnage:
         if self.hp < 0:
             self.hp = 0
 
-    def heal(self, amount):
+    def heal_self(self, amount):
         """Heal the character 
 
         Args:
@@ -67,7 +85,7 @@ class Personnage:
         return self.hp > 0
     
     def do_attack(self, target, attack_obj):
-        """Perform an attack on a target character
+        """_summary_
 
         Args:
             target (_type_): _description_
@@ -76,14 +94,14 @@ class Personnage:
         pass  # À implémenter
 
     def is_in_range(self, target, attack_obj):
-        """Check if the target is in range of the attack
+        """_summary_
 
         Args:
-            target (obj): target character
-            attack_obj (obj): attack object
+            target (_type_): _description_
+            attack_obj (_type_): _description_
 
         Returns:
-            bool: True if the target is in range, False otherwise
+            _type_: _description_
         """
         distance = abs(self.position[0] - target.position[0]) +abs(self.position[1] - target.position[1])
         return distance <= attack_obj.range
