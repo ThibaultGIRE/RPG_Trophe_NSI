@@ -1,0 +1,154 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+        "tiles"
+    ],
+    "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
+    "fileStates": {
+        "50sdiner_room_door_tiles2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map_living_room_and_kitchen.tmx": {
+            "scale": 0.927734375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 492.5978947368421,
+                "y": 239.83157894736843
+            }
+        },
+        "tiles/50sdiner_room_door_tiles1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/50sdiner_room_door_tiles2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/50sdiner_room_door_tiles3.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/50sdiner_set.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/50sdiner_set_withshadow.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/coastal_furnitureset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/coastal_furnitureset_withshadow.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/coastal_room_door_tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/corners.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/kitchen_v1.tsx": {
+            "scaleInDock": 1
+        },
+        "tiles/makeshift_furnitureset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/makeshift_room_door_tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/messy furniture set updated v2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/messy_room_door_tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/midcentury_modern_furnitureset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/midcentury_modern_room_door_tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/neon_font.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/obstacle.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/professional_kitchen.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/professional_kitchen_room_door_tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tiles/professional_kitchen_withshadows.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.externalTilesetPath": "C:/Users/thiba/Documents/GitHub/RPG_Trophe_NSI/maps_imgs",
+    "last.imagePath": "C:/Users/thiba/Documents/GitHub/RPG_Trophe_NSI/maps_imgs",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "openFiles": [
+        "tiles/50sdiner_room_door_tiles1.tsx",
+        "tiles/50sdiner_room_door_tiles2.tsx",
+        "tiles/50sdiner_room_door_tiles3.tsx",
+        "tiles/50sdiner_set.tsx",
+        "tiles/50sdiner_set_withshadow.tsx",
+        "tiles/coastal_furnitureset.tsx",
+        "tiles/coastal_furnitureset_withshadow.tsx",
+        "tiles/coastal_room_door_tiles.tsx",
+        "tiles/corners.tsx",
+        "tiles/makeshift_furnitureset.tsx",
+        "tiles/makeshift_room_door_tiles.tsx",
+        "tiles/messy furniture set updated v2.tsx",
+        "tiles/messy_room_door_tiles.tsx",
+        "tiles/midcentury_modern_furnitureset.tsx",
+        "tiles/midcentury_modern_room_door_tiles.tsx",
+        "tiles/neon_font.tsx",
+        "tiles/obstacle.tsx",
+        "tiles/professional_kitchen.tsx",
+        "tiles/professional_kitchen_room_door_tiles.tsx",
+        "tiles/professional_kitchen_withshadows.tsx"
+    ],
+    "project": "map_liviving_room.tiled-project",
+    "recentFiles": [
+        "tiles/50sdiner_room_door_tiles1.tsx",
+        "tiles/50sdiner_room_door_tiles2.tsx",
+        "tiles/50sdiner_room_door_tiles3.tsx",
+        "tiles/50sdiner_set.tsx",
+        "tiles/50sdiner_set_withshadow.tsx",
+        "tiles/coastal_furnitureset.tsx",
+        "tiles/coastal_furnitureset_withshadow.tsx",
+        "tiles/coastal_room_door_tiles.tsx",
+        "tiles/corners.tsx",
+        "tiles/makeshift_furnitureset.tsx",
+        "tiles/makeshift_room_door_tiles.tsx",
+        "tiles/messy furniture set updated v2.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
