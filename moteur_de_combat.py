@@ -16,13 +16,15 @@ class CombatManager:
             reverse = True
         )
 
-    def perform_action(self, character, action, target):
+    def perform_action(self, character, action, target, heal_amount):
         if action == "attack" and target:
             damage = self.resolve_attack(character, target, character.attacks[0])
             
             # Double attaque ?
             if character.can_double_attack(target):
                 damage += self.resolve_attack(character, target, character.attacks[0])
+        elif action == "heal" and character.hp < character.hp_max:
+            character.heal_self(heal_amount)
 
     def roll_hit(self, attacker, defender):
         #entre 10 et 95% de réussite
