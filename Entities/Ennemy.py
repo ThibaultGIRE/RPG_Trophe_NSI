@@ -3,6 +3,7 @@ from Entities.Character import Personnage
 class Enemy(Personnage):
     def __init__(self, nom, niveau, pv, pv_max, attack, defense, speed, position, attacks):
         super().__init__(nom, niveau, pv, pv_max, attack, defense, speed, position, attacks)
+        self.xp_reward = 50  # Default XP reward
 
     def decide_action(self, map, player):
         # let the class AiControler decide the action
