@@ -91,23 +91,29 @@ class GameMap:
 
     def move_character(self, character, new_x, new_y):
         old_position = character.position
-        if self.is_walkable(new_x, new_y):
-            if old_position in self.entities:
-                del self.entities[old_position]
-            self.entities[(new_x, new_y)] = character
-            character.position = (new_x, new_y)
+        if not self.is_walkable(new_x, new_y):
+            return
+        if (new_x, new_y) in self.entities and self.entities[(new_x, new_y)] is not character:
+            return
+        if old_position in self.entities:
+            del self.entities[old_position]
+        self.entities[(new_x, new_y)] = character
+        character.position = (new_x, new_y)
 
     def in_attack_range(self, attacker, defender):
         distance = abs(attacker.position[0] - defender.position[0]) + abs(attacker.position[1] - defender.position[1])
         attack_range = attacker.attacks[0].range if attacker.attacks else 1
         return distance <= attack_range
 
-    def grid_to_pixel(self, pixel_x, pixel_y):
+    def pixel_to_grid(self, pixel_x, pixel_y):
         grid_x = int(pixel_x // self.tile_width)
         grid_y = int(pixel_y // self.tile_height)
         return (grid_x, grid_y)
 
-    def pixel_to_grid(self, grid_x, grid_y):
+    def grid_to_pixel(self, grid_x, grid_y):
         pixel_x = grid_x * self.tile_width + self.tile_width / 2
         pixel_y = grid_y * self.tile_height + self.tile_height / 2
         return (pixel_x, pixel_y)
+
+    def is_occupied(self, x, y):
+        return (x, y) in self.entities

@@ -12,7 +12,7 @@ class Game(arcade.Window):
         self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
         screen_width = self.map.width * self.map.tile_width
         screen_height = self.map.height * self.map.tile_height
-        super().__init__(screen_width, screen_height, "Tactical RPG - Turn Based Combat")
+        super().__init__(screen_width, screen_height, "Tactical RPG - Turn Based Combat", resizable=True)
 
         # Single playable character
         self.player = self.create_player()
@@ -174,47 +174,70 @@ class Game(arcade.Window):
         """Draw UI for combat phase."""
         if not self.tactical_combat:
             return
-        
+
+        # Draw UI panels
+        left_panel = (10, self.height - 20, 260, 150)
+        right_panel = (self.width - 270, self.height - 20, 260, 150)
+        left_bottom = left_panel[1] - left_panel[3]
+        left_top = left_panel[1]
+        right_bottom = right_panel[1] - right_panel[3]
+        right_top = right_panel[1]
+
+        arcade.draw_lrbt_rectangle_filled(left_panel[0], left_panel[0] + left_panel[2], left_bottom, left_top, arcade.color.DARK_SLATE_GRAY)
+        arcade.draw_lrbt_rectangle_outline(left_panel[0], left_panel[0] + left_panel[2], left_bottom, left_top, arcade.color.WHITE, 2)
+        arcade.draw_lrbt_rectangle_filled(right_panel[0], right_panel[0] + right_panel[2], right_bottom, right_top, arcade.color.DARK_SLATE_GRAY)
+        arcade.draw_lrbt_rectangle_outline(right_panel[0], right_panel[0] + right_panel[2], right_bottom, right_top, arcade.color.WHITE, 2)
+
         # Draw turn indicator
         turn_text = "PLAYER TURN" if self.tactical_combat.current_turn == "player" else "ENEMY TURN"
         turn_color = arcade.color.LIGHT_GREEN if self.tactical_combat.current_turn == "player" else arcade.color.LIGHT_RED
-        arcade.draw_text(turn_text, 10, self.height - 40, turn_color, 16, bold=True)
-        
-        # Draw player stats
-        y = self.height - 70
-        arcade.draw_text(f"HP: {self.player.hp}/{self.player.hp_max}", 10, y, arcade.color.WHITE, 12)
-        arcade.draw_text(f"Level: {self.player.level}", 10, y - 20, arcade.color.WHITE, 12)
-        
-        # Draw controls
-        y -= 60
-        arcade.draw_text("CONTROLS:", 10, y, arcade.color.YELLOW, 12, bold=True)
-        y -= 25
-        arcade.draw_text("[M] Move", 10, y, arcade.color.WHITE, 11)
-        arcade.draw_text("[A] Attack", 150, y, arcade.color.WHITE, 11)
-        arcade.draw_text("[H] Heal", 260, y, arcade.color.WHITE, 11)
-        arcade.draw_text("[E] End Turn", 340, y, arcade.color.WHITE, 11)
-        
-        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", 10, y - 30, arcade.color.LIGHT_GREEN, 12)
+        arcade.draw_text(turn_text, 12, self.height - 40, turn_color, 16, bold=True)
+
+        # Hero stats panel
+        stats_x = left_panel[0] + 10
+        stats_y = left_panel[1] - 30
+        arcade.draw_text("HERO STATS", stats_x, stats_y, arcade.color.AZURE, 12, bold=True)
+        arcade.draw_text(f"Level: {self.player.level}", stats_x, stats_y - 18, arcade.color.WHITE, 10)
+        arcade.draw_text(f"HP: {self.player.hp}/{self.player.hp_max}", stats_x, stats_y - 34, arcade.color.WHITE, 10)
+        arcade.draw_text(f"ATK: {self.player.attack}", stats_x, stats_y - 50, arcade.color.WHITE, 10)
+        arcade.draw_text(f"DEF: {self.player.defense}", stats_x, stats_y - 66, arcade.color.WHITE, 10)
+        arcade.draw_text(f"SPD: {self.player.speed}", stats_x, stats_y - 82, arcade.color.WHITE, 10)
+
+        xp_required = self.xp_system.required_xp(self.player.level)
+        xp_bar_width = 230
+        xp_bar_height = 10
+        xp_ratio = min(1.0, self.player.xp / xp_required if xp_required > 0 else 1.0)
+        xp_bar_x = stats_x + xp_bar_width / 2
+        xp_bar_y = stats_y - 110
+        xp_bar_left = stats_x
+        xp_bar_right = stats_x + xp_bar_width
+        xp_bar_bottom = xp_bar_y - xp_bar_height / 2
+        xp_bar_top = xp_bar_y + xp_bar_height / 2
+        arcade.draw_lrbt_rectangle_filled(xp_bar_left, xp_bar_right, xp_bar_bottom, xp_bar_top, arcade.color.GRAY)
+        filled_right = xp_bar_left + xp_bar_width * xp_ratio
+        arcade.draw_lrbt_rectangle_filled(xp_bar_left, filled_right, xp_bar_bottom, xp_bar_top, arcade.color.GREEN)
+        arcade.draw_text(f"XP: {self.player.xp}/{xp_required}", stats_x, xp_bar_y - 18, arcade.color.WHITE, 10)
+
+        # Controls panel
+        controls_x = right_panel[0] + 10
+        controls_y = right_panel[1] - 30
+        arcade.draw_text("CONTROLS", controls_x, controls_y, arcade.color.AZURE, 12, bold=True)
+        arcade.draw_text("M: Move", controls_x, controls_y - 18, arcade.color.WHITE, 10)
+        arcade.draw_text("A: Attack", controls_x, controls_y - 34, arcade.color.WHITE, 10)
+        arcade.draw_text("H: Heal", controls_x, controls_y - 50, arcade.color.WHITE, 10)
+        arcade.draw_text("E: End Turn", controls_x, controls_y - 66, arcade.color.WHITE, 10)
+        arcade.draw_text("Esc: Quit", controls_x, controls_y - 82, arcade.color.WHITE, 10)
+        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", controls_x, controls_y - 100, arcade.color.LIGHT_GREEN, 10)
 
         # Draw selected action
         if self.selected_action:
             action_text = f"Selected: {self.selected_action.upper()}"
-            arcade.draw_text(action_text, 10, y - 50, arcade.color.YELLOW, 12)
-        
-        # Draw highlighted tiles
+            arcade.draw_text(action_text, 12, self.height - 70, arcade.color.YELLOW, 12)
+
+        # Draw highlight tiles
         self._draw_highlighted_tiles()
-        
-        # Draw enemy info
-        y = self.height - 70
-        x = self.width - 250
-        arcade.draw_text("ENEMIES:", x, y, arcade.color.YELLOW, 12, bold=True)
-        y -= 25
-        
-        for enemy in self.enemies:
-            if enemy.is_alive():
-                enemy_text = f"{enemy.name} - HP: {enemy.hp}/{enemy.hp_max}"
-                arcade.draw_text(enemy_text, x, y, arcade.color.WHITE, 11)
-                y -= 20
+
+        # No enemy text overlay to reduce clutter
 
     def _draw_highlighted_tiles(self):
         """Draw highlighted movement and attack range tiles."""
@@ -460,7 +483,7 @@ class Game(arcade.Window):
             return
         
         # Convert pixel to grid coordinates
-        grid_x, grid_y = self.map.grid_to_pixel(x, y)
+        grid_x, grid_y = self.map.pixel_to_grid(x, y)
         
         if self.selected_action == "move":
             if self.tactical_combat.player_move(grid_x, grid_y):

@@ -1,3 +1,9 @@
+import os
+import sys
+
+if __name__ == "__main__" and __package__ is None:
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from Entities.Attack import Attack
 
 stat_de_base = {"base enemy":{"level": 1, 

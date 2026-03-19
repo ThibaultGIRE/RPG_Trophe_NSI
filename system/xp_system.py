@@ -10,10 +10,9 @@ class XpSystem:
     
     @staticmethod
     def gain_xp(character, xp):
-        requi_xp = XpSystem.required_xp(character.level)
         character.xp += xp
-        if character.xp >= requi_xp:
-            character.xp -= requi_xp
+        while character.xp >= XpSystem.required_xp(character.level):
+            character.xp -= XpSystem.required_xp(character.level)
             XpSystem.level_up(character)
 
 

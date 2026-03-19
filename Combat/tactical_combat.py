@@ -49,7 +49,7 @@ class TacticalCombat:
             
             if distance < self.movement_range:
                 for nx, ny in self.game_map.get_neighbors(x, y):
-                    if (nx, ny) not in visited:
+                    if (nx, ny) not in visited and not self.game_map.is_occupied(nx, ny):
                         visited.add((nx, ny))
                         queue.append(((nx, ny), distance + 1))
         
@@ -93,7 +93,9 @@ class TacticalCombat:
         movement_tiles = self.get_movement_tiles()
         if (new_x, new_y) not in movement_tiles:
             return False
-        
+        if self.game_map.is_occupied(new_x, new_y) and (new_x, new_y) != self.player.position:
+            return False
+
         self.game_map.move_character(self.player, new_x, new_y)
         self.player_has_moved = True
         return True
@@ -274,7 +276,7 @@ class TacticalCombat:
                     new_x = ex
                     new_y = ey + (1 if py > ey else -1)
                 
-                if self.game_map.is_walkable(new_x, new_y):
+                if self.game_map.is_walkable(new_x, new_y) and not self.game_map.is_occupied(new_x, new_y):
                     self.game_map.move_character(enemy, new_x, new_y)
                     result["type"] = "move"
                     result.update({"to": (new_x, new_y)})
