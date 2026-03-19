@@ -73,6 +73,26 @@ class Game(arcade.Window):
         
         return player 
     
+    def get_map_draw_info(self):
+        # Draw the map to fill the window while preserving aspect ratio
+        return self.map.get_draw_info(origin_x=0, origin_y=0, draw_width=self.width, draw_height=self.height)
+
+    def grid_to_screen(self, grid_x, grid_y):
+        info = self.get_map_draw_info()
+        pixel_x = info["offset_x"] + grid_x * info["tile_w"] + info["tile_w"] / 2
+        pixel_y = info["offset_y"] + grid_y * info["tile_h"] + info["tile_h"] / 2
+        return (pixel_x, pixel_y)
+
+    def screen_to_grid(self, x, y):
+        info = self.get_map_draw_info()
+        if x < info["offset_x"] or y < info["offset_y"]:
+            return None
+        grid_x = int((x - info["offset_x"]) // info["tile_w"])
+        grid_y = int((y - info["offset_y"]) // info["tile_h"])
+        if 0 <= grid_x < self.map.width and 0 <= grid_y < self.map.height:
+            return (grid_x, grid_y)
+        return None
+
     def on_draw(self):
         self.clear()
 
@@ -81,7 +101,7 @@ class Game(arcade.Window):
             return
 
         # Draw map and entities
-        self.map.draw()
+        self.map.draw(origin_x=0, origin_y=0, draw_width=self.width, draw_height=self.height)
         self._draw_characters()
 
         # Draw UI based on current phase
@@ -107,17 +127,19 @@ class Game(arcade.Window):
             character: Character to draw
             color: Color for the character sprite
         """
-        pixel_x, pixel_y = self.map.pixel_to_grid(*character.position)
-        
+        pixel_x, pixel_y = self.grid_to_screen(*character.position)
+        info = self.get_map_draw_info()
+
         # Draw character circle
-        arcade.draw_circle_filled(pixel_x, pixel_y, self.map.tile_width // 3, color)
+        arc_radius = min(info["tile_w"], info["tile_h"]) / 3
+        arcade.draw_circle_filled(pixel_x, pixel_y, arc_radius, color)
         
         # Draw HP bar
-        bar_width = self.map.tile_width - 4
-        bar_height = 4
+        bar_width = info["tile_w"] - 4
+        bar_height = max(3, info["tile_h"] * 0.08)
         hp_ratio = character.hp / character.hp_max
         
-        bar_y = pixel_y + self.map.tile_height // 2 + 2
+        bar_y = pixel_y + info["tile_h"] / 2 + 2
         
         # Background (red)
         arcade.draw_lrbt_rectangle_filled(
@@ -244,22 +266,20 @@ class Game(arcade.Window):
         if self.tactical_combat.current_turn != "player" or not self.highlighted_tiles:
             return
         
+        info = self.get_map_draw_info()
         for tile_x, tile_y in self.highlighted_tiles:
-            pixel_x, pixel_y = self.map.pixel_to_grid(tile_x, tile_y)
-            
+            pixel_x, pixel_y = self.grid_to_screen(tile_x, tile_y)
+
             # Draw semi-transparent tile
             if self.selected_action == "move":
                 color = arcade.color.BLUE
-                alpha = 100
             else:  # attack
                 color = arcade.color.RED
-                alpha = 100
-            
-            # Draw dotted outline tile
-            left = pixel_x - self.map.tile_width / 2 + 1
-            right = pixel_x + self.map.tile_width / 2 - 1
-            bottom = pixel_y - self.map.tile_height / 2 + 1
-            top = pixel_y + self.map.tile_height / 2 - 1
+
+            left = pixel_x - info["tile_w"] / 2 + 1
+            right = pixel_x + info["tile_w"] / 2 - 1
+            bottom = pixel_y - info["tile_h"] / 2 + 1
+            top = pixel_y + info["tile_h"] / 2 - 1
             arcade.draw_line(left, bottom, right, bottom, color, 2)
             arcade.draw_line(left, top, right, top, color, 2)
             arcade.draw_line(left, bottom, left, top, color, 2)
@@ -483,8 +503,11 @@ class Game(arcade.Window):
             return
         
         # Convert pixel to grid coordinates
-        grid_x, grid_y = self.map.pixel_to_grid(x, y)
-        
+        grid_coords = self.screen_to_grid(x, y)
+        if not grid_coords:
+            return
+        grid_x, grid_y = grid_coords
+
         if self.selected_action == "move":
             if self.tactical_combat.player_move(grid_x, grid_y):
                 self.selected_action = None

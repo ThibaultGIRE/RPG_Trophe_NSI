@@ -23,13 +23,31 @@ class GameMap:
             if (x, y) not in self.obstacles:
                 self.obstacles.add((x, y))
 
-    def draw(self):
+    def draw(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
+        if draw_width is None:
+            draw_width = self.width * self.tile_width
+        if draw_height is None:
+            draw_height = self.height * self.tile_height
+
+        scale_x = draw_width / (self.width * self.tile_width)
+        scale_y = draw_height / (self.height * self.tile_height)
+        scale = min(scale_x, scale_y)
+
+        tile_w = self.tile_width * scale
+        tile_h = self.tile_height * scale
+        total_width = tile_w * self.width
+        total_height = tile_h * self.height
+
+        # Center map in provided rect
+        offset_x = origin_x + (draw_width - total_width) / 2
+        offset_y = origin_y + (draw_height - total_height) / 2
+
         # Draw map background
         arcade.draw_lrbt_rectangle_filled(
-            left=0,
-            right=self.width * self.tile_width,
-            bottom=0,
-            top=self.height * self.tile_height,
+            left=offset_x,
+            right=offset_x + total_width,
+            bottom=offset_y,
+            top=offset_y + total_height,
             color=arcade.color.DARK_SLATE_GRAY,
         )
 
@@ -37,12 +55,11 @@ class GameMap:
         dot_color = arcade.color.LIGHT_GRAY
         for y in range(self.height):
             for x in range(self.width):
-                x1 = x * self.tile_width
-                y1 = y * self.tile_height
-                x2 = x1 + self.tile_width
-                y2 = y1 + self.tile_height
+                x1 = offset_x + x * tile_w
+                y1 = offset_y + y * tile_h
+                x2 = x1 + tile_w
+                y2 = y1 + tile_h
 
-                # Draw dotted outline for each cell
                 self._draw_dotted_rect(x1, y1, x2, y2, dot_color)
 
                 # Obstacle fill
@@ -54,6 +71,34 @@ class GameMap:
                         top=y2 - 2,
                         color=arcade.color.GRAY,
                     )
+
+    def get_draw_info(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
+        if draw_width is None:
+            draw_width = self.width * self.tile_width
+        if draw_height is None:
+            draw_height = self.height * self.tile_height
+
+        scale_x = draw_width / (self.width * self.tile_width)
+        scale_y = draw_height / (self.height * self.tile_height)
+        scale = min(scale_x, scale_y)
+
+        tile_w = self.tile_width * scale
+        tile_h = self.tile_height * scale
+        total_width = tile_w * self.width
+        total_height = tile_h * self.height
+
+        offset_x = origin_x + (draw_width - total_width) / 2
+        offset_y = origin_y + (draw_height - total_height) / 2
+
+        return {
+            "scale": scale,
+            "tile_w": tile_w,
+            "tile_h": tile_h,
+            "offset_x": offset_x,
+            "offset_y": offset_y,
+            "total_width": total_width,
+            "total_height": total_height,
+        }
 
     def _draw_dotted_rect(self, x1, y1, x2, y2, color, dash=8, gap=6):
         # Draw dashed horizontal lines
