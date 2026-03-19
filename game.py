@@ -8,13 +8,11 @@ from Entities.Attack import Attack
 from Combat.tactical_combat import TacticalCombat
 
 class Game(arcade.Window):
-    def __init__(self, tmx_file_path):
-        temp_map = arcade.load_tilemap(tmx_file_path, scaling=1.0)
-        screen_width = temp_map.width * temp_map.tile_width
-        screen_height = temp_map.height * temp_map.tile_height
+    def __init__(self):
+        self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
+        screen_width = self.map.width * self.map.tile_width
+        screen_height = self.map.height * self.map.tile_height
         super().__init__(screen_width, screen_height, "Tactical RPG - Turn Based Combat")
-
-        self.map = GameMap(tmx_file_path)
 
         # Single playable character
         self.player = self.create_player()
@@ -27,14 +25,14 @@ class Game(arcade.Window):
         self.spawner = Ennemy_Spawner(self.map)
 
         # Game state
-        self.phase = "exploration"  # "exploration" or "combat"
+        self.phase = "menu"  # "menu", "exploration", or "combat"
         self.in_combat = False
         
         # Visual elements
         self.player_sprite = None
         self.enemy_sprites = arcade.SpriteList()
         
-        self.camera = arcade.Camera(screen_width, screen_height)
+        self.camera = None
         
         # UI state
         self.selected_action = None  # "move" or "attack"
@@ -63,20 +61,29 @@ class Game(arcade.Window):
             position=(0, 0),
             attacks=[basic_attack]
         )
-        
-        # Place player on map
-        self.map.place_character(player, 5, 5)
+
+        # Place player on a valid tile
+        start_x, start_y = 0, 0
+        while not self.map.is_walkable(start_x, start_y):
+            start_x += 1
+            if start_x >= self.map.width:
+                start_x = 0
+                start_y += 1
+        self.map.place_character(player, start_x, start_y)
         
         return player 
     
     def on_draw(self):
         self.clear()
-        self.camera.use()
+
+        if self.phase == "menu":
+            self._draw_menu()
+            return
 
         # Draw map and entities
-        self.map.scene.draw()
+        self.map.draw()
         self._draw_characters()
-        
+
         # Draw UI based on current phase
         if self.phase == "exploration":
             self._draw_exploration_ui()
@@ -113,26 +120,29 @@ class Game(arcade.Window):
         bar_y = pixel_y + self.map.tile_height // 2 + 2
         
         # Background (red)
-        arcade.draw_rect_filled(
-            pixel_x, bar_y,
-            bar_width, bar_height,
-            arcade.color.RED
+        arcade.draw_lrbt_rectangle_filled(
+            left=pixel_x - bar_width / 2,
+            right=pixel_x + bar_width / 2,
+            bottom=bar_y - bar_height / 2,
+            top=bar_y + bar_height / 2,
+            color=arcade.color.RED,
         )
-        
+
         # HP (green)
-        arcade.draw_rect_filled(
-            pixel_x - bar_width // 2 + (bar_width * hp_ratio) // 2,
-            bar_y,
-            bar_width * hp_ratio,
-            bar_height,
-            arcade.color.GREEN
+        inner_width = max(1, bar_width * hp_ratio)
+        arcade.draw_lrbt_rectangle_filled(
+            left=pixel_x - bar_width / 2,
+            right=pixel_x - bar_width / 2 + inner_width,
+            bottom=bar_y - bar_height / 2,
+            top=bar_y + bar_height / 2,
+            color=arcade.color.GREEN,
         )
 
     def _draw_exploration_ui(self):
         """Draw UI for exploration phase."""
         if not self.exploration:
             return
-        
+
         # Draw action log
         y_offset = self.height - 50
         arcade.draw_text("EXPLORATION PHASE", 10, y_offset, arcade.color.WHITE, 14, bold=True)
@@ -143,8 +153,21 @@ class Game(arcade.Window):
         # Draw progress bar
         progress = min(1.0, self.exploration.timer / 3.0)
         bar_width = 200
-        arcade.draw_rect_outline(50, 30, bar_width, 20, arcade.color.WHITE, 2)
-        arcade.draw_rect_filled(50, 30, bar_width * progress, 20, arcade.color.GREEN)
+        left = 50
+        right = 50 + bar_width
+        bottom = 20
+        top = 40
+        arcade.draw_line(left, bottom, right, bottom, arcade.color.WHITE, 2)
+        arcade.draw_line(left, top, right, top, arcade.color.WHITE, 2)
+        arcade.draw_line(left, bottom, left, top, arcade.color.WHITE, 2)
+        arcade.draw_line(right, bottom, right, top, arcade.color.WHITE, 2)
+        arcade.draw_lrbt_rectangle_filled(
+            left=left + 1,
+            right=left + 1 + bar_width * progress,
+            bottom=bottom + 1,
+            top=bottom + 19,
+            color=arcade.color.GREEN,
+        )
         arcade.draw_text(f"{progress*100:.0f}%", 60, 35, arcade.color.WHITE, 12)
 
     def _draw_combat_ui(self):
@@ -168,12 +191,15 @@ class Game(arcade.Window):
         y -= 25
         arcade.draw_text("[M] Move", 10, y, arcade.color.WHITE, 11)
         arcade.draw_text("[A] Attack", 150, y, arcade.color.WHITE, 11)
-        arcade.draw_text("[E] End Turn", 300, y, arcade.color.WHITE, 11)
+        arcade.draw_text("[H] Heal", 260, y, arcade.color.WHITE, 11)
+        arcade.draw_text("[E] End Turn", 340, y, arcade.color.WHITE, 11)
         
+        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", 10, y - 30, arcade.color.LIGHT_GREEN, 12)
+
         # Draw selected action
         if self.selected_action:
             action_text = f"Selected: {self.selected_action.upper()}"
-            arcade.draw_text(action_text, 10, y - 30, arcade.color.YELLOW, 12)
+            arcade.draw_text(action_text, 10, y - 50, arcade.color.YELLOW, 12)
         
         # Draw highlighted tiles
         self._draw_highlighted_tiles()
@@ -206,15 +232,16 @@ class Game(arcade.Window):
                 color = arcade.color.RED
                 alpha = 100
             
-            # Draw rectangle (we'll use overlays)
-            arcade.draw_rectangle_outline(
-                pixel_x, pixel_y,
-                self.map.tile_width - 2,
-                self.map.tile_height - 2,
-                color,
-                2
-            )
-         
+            # Draw dotted outline tile
+            left = pixel_x - self.map.tile_width / 2 + 1
+            right = pixel_x + self.map.tile_width / 2 - 1
+            bottom = pixel_y - self.map.tile_height / 2 + 1
+            top = pixel_y + self.map.tile_height / 2 - 1
+            arcade.draw_line(left, bottom, right, bottom, color, 2)
+            arcade.draw_line(left, top, right, top, color, 2)
+            arcade.draw_line(left, bottom, left, top, color, 2)
+            arcade.draw_line(right, bottom, right, top, color, 2)
+
     def on_update(self, delta_time):
         """Update game state each frame."""
         if self.phase == "exploration":
@@ -311,8 +338,38 @@ class Game(arcade.Window):
                 del self.map.entities[old_pos]
         self.enemies = []
 
+    def _draw_menu(self):
+        arcade.draw_text("Tactical RPG", self.width / 2, self.height - 120, arcade.color.WHITE, 36, anchor_x="center")
+        arcade.draw_text("Press [ENTER] to Start", self.width / 2, self.height - 180, arcade.color.AZURE, 22, anchor_x="center")
+        arcade.draw_text("Press [ESCAPE] to Quit", self.width / 2, self.height - 220, arcade.color.ORANGE, 20, anchor_x="center")
+        arcade.draw_text("Controls: M=Move, A=Attack, E=End Turn", self.width / 2, self.height - 270, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
+
     def on_key_press(self, key, modifiers):
         """Handle key press events."""
+        if key == arcade.key.ESCAPE:
+            self.close()
+            return
+
+        if self.phase == "menu":
+            if key == arcade.key.ENTER or key == arcade.key.RETURN:
+                self.phase = "exploration"
+                self.exploration = None
+                self.tactical_combat = None
+                self.selected_action = None
+                self.highlighted_tiles = set()
+                self.enemies = []
+                self.player.hp = self.player.hp_max
+                self.map.entities.clear()
+                start_x, start_y = 0, 0
+                while not self.map.is_walkable(start_x, start_y):
+                    start_x += 1
+                    if start_x >= self.map.width:
+                        start_x = 0
+                        start_y += 1
+                self.map.place_character(self.player, start_x, start_y)
+                self._start_exploration()
+            return
+
         if self.phase == "combat":
             self._handle_combat_key(key, modifiers)
     
@@ -335,7 +392,18 @@ class Game(arcade.Window):
         elif key == arcade.key.A:
             self.selected_action = "attack"
             self.highlighted_tiles = self.tactical_combat.get_attack_tiles()
-        
+
+        # Select heal action
+        elif key == arcade.key.H:
+            self.selected_action = "heal"
+            self.highlighted_tiles = set()
+            heal_result = self.tactical_combat.player_heal()
+            if heal_result["success"]:
+                self.selected_action = None
+                self.highlighted_tiles = set()
+            else:
+                print(f"Heal failed: {heal_result['reason']}")
+
         # Execute movement
         elif key == arcade.key.UP and self.selected_action == "move":
             x, y = self.player.position

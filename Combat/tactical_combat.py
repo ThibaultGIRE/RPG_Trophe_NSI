@@ -20,10 +20,13 @@ class TacticalCombat:
         self.enemy_turn_index = 0
         self.player_has_moved = False
         self.player_has_attacked = False
+        self.player_has_healed = False
         
-        # Movement and attack ranges
+        # Movement, attack and heal ranges
         self.movement_range = 5  # Player can move up to 5 tiles per turn
         self.attack_range = 1  # Default attack range
+        self.heal_amount = 10
+        self.heal_uses = self.player.level * 4
         
     def get_movement_tiles(self):
         """Calculate all tiles within movement range from player position.
@@ -132,7 +135,25 @@ class TacticalCombat:
             "damage": damage,
             "target_hp": target.hp
         }
-    
+
+    def player_heal(self):
+        """Heal the player if heal uses remain.
+
+        Returns:
+            dict: Result with success and message.
+        """
+        if self.player_has_healed or self.player_has_attacked:
+            return {"success": False, "reason": "Action already used this turn"}
+        if self.heal_uses <= 0:
+            return {"success": False, "reason": "No heal uses left"}
+        if self.player.hp >= self.player.hp_max:
+            return {"success": False, "reason": "HP already full"}
+
+        self.player.heal_self(self.heal_amount)
+        self.heal_uses -= 1
+        self.player_has_healed = True
+        return {"success": True, "amount": self.heal_amount, "current_hp": self.player.hp, "uses_left": self.heal_uses}
+
     def _resolve_attack(self, attacker, defender):
         """Calculate damage and apply it to defender.
         
@@ -204,6 +225,9 @@ class TacticalCombat:
         """End the player's turn and start enemy turn."""
         self.current_turn = "enemy"
         self.enemy_turn_index = 0
+        self.player_has_moved = False
+        self.player_has_attacked = False
+        self.player_has_healed = False
     
     def process_enemy_turn(self):
         """Process one enemy's turn and return action result.

@@ -26,7 +26,7 @@ class XpSystem:
     def apply_stat_growth(character):
 
         growth_rates = {
-            'hp' : 60,
+            'hp' : 90,
             'attack' : 45,
             'defense' : 40,
             'speed' : 50

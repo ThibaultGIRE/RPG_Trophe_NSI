@@ -219,41 +219,6 @@ self.spawner.spawn_rules["max_enemies"] = 12  # More enemies
 ├── GAME_MECHANICS.md          ← Full mechanics guide
 ├── REFACTORING_SUMMARY.md     ← Technical changes
 └── API_REFERENCE.md           ← Detailed API docs
-```
-
-## Next Steps for Development
-
-### Easy Additions
-1. Add more enemy types
-2. Add special attacks/abilities
-3. Add item/equipment system
-4. Add visual effects
-
-### Medium Difficulty
-1. Add procedural map generation
-2. Add boss battles
-3. Add different map themes
-4. Add sound system
-
-### Advanced Features
-1. Save/load system
-2. Multiple characters
-3. Campaign mode
-4. Multiplayer
-
-## Documentation
-
-- **[GAME_MECHANICS.md](GAME_MECHANICS.md)** - Complete game mechanics
-- **[REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md)** - What changed
-- **[API_REFERENCE.md](API_REFERENCE.md)** - Developer API reference
-
-## Support
-
-For issues or questions:
-1. Check [GAME_MECHANICS.md](GAME_MECHANICS.md) for game rules
-2. Check [API_REFERENCE.md](API_REFERENCE.md) for code structure
-3. Review [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) for architecture
-
 ---
 
 **Enjoy the game! Have fun with tactical combat!** 🎮

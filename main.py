@@ -1,9 +1,8 @@
-from game import Game 
+from game import Game
 import arcade
 
 def main():
-    
-    game = Game("maps_imgs/map_living_room_and_kitchen.tmx")
+    game = Game()
     arcade.run()
 
 if __name__ == "__main__":
