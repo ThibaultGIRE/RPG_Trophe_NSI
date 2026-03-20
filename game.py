@@ -1,6 +1,7 @@
 import arcade
 import json
 import os
+import time
 import warnings
 from arcade.exceptions import PerformanceWarning
 from Map.game_map import GameMap
@@ -32,8 +33,14 @@ class Game(arcade.Window):
         self.xp_system = XpSystem()
         self.spawner = Ennemy_Spawner(self.map)
 
+        # Save system
+        self.SAVE_SLOTS = 3
+        self.save_folder = os.path.join(os.getcwd(), "saves")
+        self._ensure_save_folder()
+        self.previous_phase = "exploration"
+
         # Game state
-        self.phase = "menu"  # "menu", "exploration", or "combat"
+        self.phase = "menu"  # "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
         self.in_combat = False
         
         # Visual elements
@@ -84,7 +91,62 @@ class Game(arcade.Window):
         self.map.place_character(player, start_x, start_y)
         
         return player 
-    
+
+    def _ensure_save_folder(self):
+        if not os.path.exists(self.save_folder):
+            os.makedirs(self.save_folder, exist_ok=True)
+
+    def _get_save_path(self, slot):
+        return os.path.join(self.save_folder, f"save_slot_{slot}.json")
+
+    def _has_save_slot(self, slot):
+        return os.path.exists(self._get_save_path(slot))
+
+    def _any_save_exists(self):
+        return any(self._has_save_slot(slot) for slot in range(1, self.SAVE_SLOTS + 1))
+
+    def _read_slot_info(self, slot):
+        path = self._get_save_path(slot)
+        if not os.path.exists(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                player = data.get("player", {})
+                return {
+                    "name": player.get("name", "Hero"),
+                    "level": player.get("level", 1),
+                    "hp": player.get("hp", 0),
+                    "hp_max": player.get("hp_max", 0),
+                    "xp": player.get("xp", 0),
+                    "phase": data.get("phase", "exploration"),
+                    "saved_at": data.get("saved_at", "?")
+                }
+        except Exception:
+            return None
+
+    def _start_new_game(self):
+        self.phase = "exploration"
+        self.enemies = []
+        self.tactical_combat = None
+        self.exploration = None
+        self.selected_action = None
+        self.highlighted_tiles = set()
+        self.save_message = ""
+        self.save_message_timer = 0.0
+        self.last_xp_gain = 0
+
+        self.player.hp = self.player.hp_max
+        self.map.entities.clear()
+        start_x, start_y = 0, 0
+        while not self.map.is_walkable(start_x, start_y):
+            start_x += 1
+            if start_x >= self.map.width:
+                start_x = 0
+                start_y += 1
+        self.map.place_character(self.player, start_x, start_y)
+        self._start_exploration()
+
     def get_map_draw_info(self):
         # Reserve side panels during combat so the map doesn't get hidden behind UI boxes.
         if self.phase == "combat":
@@ -127,6 +189,14 @@ class Game(arcade.Window):
 
         if self.phase == "menu":
             self._draw_menu()
+            return
+
+        if self.phase == "load_menu":
+            self._draw_load_menu()
+            return
+
+        if self.phase == "save_menu":
+            self._draw_save_menu()
             return
 
         if self.phase in ["victory", "defeat"]:
@@ -511,11 +581,41 @@ class Game(arcade.Window):
         arcade.draw_text("Tactical RPG", self.width / 2, self.height - 120, arcade.color.WHITE, 36, anchor_x="center")
         arcade.draw_text("Press [ENTER] to Start", self.width / 2, self.height - 180, arcade.color.AZURE, 22, anchor_x="center")
         arcade.draw_text("Press [ESCAPE] to Quit", self.width / 2, self.height - 220, arcade.color.ORANGE, 20, anchor_x="center")
-        arcade.draw_text("Controls: M=Move, A=Attack, E=End Turn", self.width / 2, self.height - 270, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
-        arcade.draw_text("S: Save, L: Load", self.width / 2, self.height - 310, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
+        arcade.draw_text("S: Save (in-game) | L: Load menu", self.width / 2, self.height - 260, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
+        if self._any_save_exists():
+            arcade.draw_text("Sauvegardes existantes: appuyez sur [ENTER] pour choisir un slot", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
+            arcade.draw_text("Dans le menu de chargement, 1-3 pour charger un slot ou N pour nouvelle partie", self.width / 2, self.height - 330, arcade.color.LIGHT_GRAY, 14, anchor_x="center")
+        else:
+            arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTER] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
 
-    def save_game(self):
+    def _draw_load_menu(self):
+        arcade.draw_text("Choisissez un emplacement de sauvegarde", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
+        for slot in range(1, self.SAVE_SLOTS + 1):
+            info = self._read_slot_info(slot)
+            y = self.height - 180 - slot * 40
+            if info:
+                saved_at = info.get("saved_at", "?")
+                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} HP {info['hp']}/{info['hp_max']} XP {info['xp']} Phase {info['phase']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
+            else:
+                arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
+        arcade.draw_text("1-3: Charger | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+
+    def _draw_save_menu(self):
+        arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
+        for slot in range(1, self.SAVE_SLOTS + 1):
+            info = self._read_slot_info(slot)
+            y = self.height - 180 - slot * 40
+            if info:
+                saved_at = info.get("saved_at", "?")
+                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} - REMPLACE ({saved_at})", self.width / 2, y, arcade.color.ORANGE, 14, anchor_x="center")
+            else:
+                arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.LIGHT_GREEN, 16, anchor_x="center")
+        arcade.draw_text("1-3: Sauvegarder | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+
+    def save_game(self, slot):
+        self._ensure_save_folder()
         save_data = {
+            "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "player": {
                 "name": self.player.name,
                 "level": self.player.level,
@@ -570,20 +670,20 @@ class Game(arcade.Window):
             "phase": self.phase,
         }
 
-        save_path = os.path.join(os.getcwd(), "savegame.json")
-        with open(save_path, "w", encoding="utf-8") as f:
+        slot_path = self._get_save_path(slot)
+        with open(slot_path, "w", encoding="utf-8") as f:
             json.dump(save_data, f, ensure_ascii=False, indent=2)
-        self.save_message = "Sauvegarde enregistrée !"
+        self.save_message = f"Sauvegarde enregistrée dans slot {slot}!"
         self.save_message_timer = 2.0
 
-    def load_game(self):
-        save_path = os.path.join(os.getcwd(), "savegame.json")
-        save_path = os.path.join(os.getcwd(), "savegame.json")
-        if not os.path.exists(save_path):
-            print("Aucune sauvegarde trouvée.")
-            return
+    def load_game(self, slot):
+        slot_path = self._get_save_path(slot)
+        if not os.path.exists(slot_path):
+            self.save_message = f"Aucune sauvegarde dans le slot {slot}."
+            self.save_message_timer = 2.0
+            return False
 
-        with open(save_path, "r", encoding="utf-8") as f:
+        with open(slot_path, "r", encoding="utf-8") as f:
             save_data = json.load(f)
 
         map_data = save_data.get("map", {})
@@ -638,62 +738,87 @@ class Game(arcade.Window):
 
         self.phase = save_data.get("phase", "exploration")
         self.tactical_combat = None
+        self.exploration = None
+        if self.phase == "combat":
+            self.tactical_combat = TacticalCombat(self.player, self.enemies, self.map)
+        elif self.phase == "exploration":
+            self.exploration = ExplorationPhase(self.map, self.player)
+            self.exploration.start_exploration()
         self.selected_action = None
         self.highlighted_tiles = set()
-        self.save_message = "Partie chargée !"
+        self.save_message = f"Sauvegarde slot {slot} chargée !"
         self.save_message_timer = 2.0
+        return True
 
     def on_key_press(self, key, modifiers):
         """Handle key press events."""
         if key == arcade.key.ESCAPE:
+            if self.phase in ["load_menu", "save_menu"]:
+                self.phase = "menu"
+                return
             self.close()
-            return
-
-        if key == arcade.key.S:
-            self.save_game()
-            return
-        if key == arcade.key.L:
-            self.load_game()
             return
 
         if self.phase == "menu":
             if key == arcade.key.ENTER or key == arcade.key.RETURN:
-                self.phase = "exploration"
-                self.exploration = None
-                self.tactical_combat = None
-                self.selected_action = None
-                self.highlighted_tiles = set()
-                self.enemies = []
-                self.player.hp = self.player.hp_max
-                self.map.entities.clear()
-                start_x, start_y = 0, 0
-                while not self.map.is_walkable(start_x, start_y):
-                    start_x += 1
-                    if start_x >= self.map.width:
-                        start_x = 0
-                        start_y += 1
-                self.map.place_character(self.player, start_x, start_y)
-                self._start_exploration()
+                if self._any_save_exists():
+                    self.phase = "load_menu"
+                else:
+                    self._start_new_game()
+                return
+            return
+
+        if self.phase == "load_menu":
+            if key == arcade.key.KEY_1:
+                slot = 1
+            elif key == arcade.key.KEY_2:
+                slot = 2
+            elif key == arcade.key.KEY_3:
+                slot = 3
+            else:
+                slot = None
+
+            if slot is not None:
+                if self.load_game(slot):
+                    # phase is restored by load_game
+                    pass
+                return
+            if key == arcade.key.N:
+                self._start_new_game()
+                return
+            return
+
+        if self.phase == "save_menu":
+            if key == arcade.key.KEY_1:
+                slot = 1
+            elif key == arcade.key.KEY_2:
+                slot = 2
+            elif key == arcade.key.KEY_3:
+                slot = 3
+            else:
+                slot = None
+
+            if slot is not None:
+                self.save_game(slot)
+                self.phase = self.previous_phase
+                return
+            if key == arcade.key.ESCAPE:
+                self.phase = self.previous_phase
+                return
+            return
+
+        if key == arcade.key.S and self.phase in ["exploration", "combat"]:
+            self.previous_phase = self.phase
+            self.phase = "save_menu"
+            return
+
+        if key == arcade.key.L and self.phase in ["menu", "exploration", "combat"]:
+            self.phase = "load_menu"
             return
 
         if self.phase in ["victory", "defeat"]:
             if key == arcade.key.ENTER or key == arcade.key.RETURN:
-                self.phase = "exploration"
-                self.exploration = None
-                self.tactical_combat = None
-                self.selected_action = None
-                self.highlighted_tiles = set()
-                self.enemies = []
-                self.player.hp = self.player.hp_max
-                self.map.entities.clear()
-                start_x, start_y = 0, 0
-                while not self.map.is_walkable(start_x, start_y):
-                    start_x += 1
-                    if start_x >= self.map.width:
-                        start_x = 0
-                        start_y += 1
-                self.map.place_character(self.player, start_x, start_y)
-                self._start_exploration()
+                self._start_new_game()
             return
 
         if self.phase == "combat":

@@ -1,0 +1,145 @@
+{
+  "saved_at": "2026-03-20 16:37:56",
+  "player": {
+    "name": "Hero",
+    "level": 1,
+    "hp": 4,
+    "hp_max": 20,
+    "attack": 7,
+    "defense": 5,
+    "speed": 6,
+    "xp": 0,
+    "position": [
+      9,
+      10
+    ],
+    "attacks": [
+      {
+        "name": "Sword",
+        "precision": 85,
+        "range": 1,
+        "special_effect": null,
+        "base_damage": 8
+      }
+    ]
+  },
+  "map": {
+    "width": 14,
+    "height": 10,
+    "tile_width": 64,
+    "tile_height": 64,
+    "obstacles": [
+      [
+        6,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        12,
+        7
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        7,
+        9
+      ],
+      [
+        9,
+        5
+      ],
+      [
+        11,
+        2
+      ],
+      [
+        13,
+        9
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        9
+      ],
+      [
+        10,
+        9
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        7
+      ]
+    ]
+  },
+  "enemies": [
+    {
+      "name": "base enemy_1",
+      "level": 1,
+      "hp": 15,
+      "hp_max": 15,
+      "attack": 7,
+      "defense": 3,
+      "speed": 3,
+      "position": [
+        4,
+        3
+      ],
+      "attacks": [
+        {
+          "name": "Claw",
+          "precision": 80,
+          "range": 1,
+          "special_effect": null,
+          "base_damage": 6
+        }
+      ]
+    },
+    {
+      "name": "boss_1",
+      "level": 1,
+      "hp": 45,
+      "hp_max": 50,
+      "attack": 15,
+      "defense": 10,
+      "speed": 10,
+      "position": [
+        5,
+        8
+      ],
+      "attacks": [
+        {
+          "name": "Claw",
+          "precision": 80,
+          "range": 1,
+          "special_effect": null,
+          "base_damage": 6
+        }
+      ]
+    }
+  ],
+  "phase": "save_menu"
+}
