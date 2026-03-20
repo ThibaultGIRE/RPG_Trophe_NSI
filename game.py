@@ -38,6 +38,8 @@ class Game(arcade.Window):
         self.selected_action = None  # "move" or "attack"
         self.highlighted_tiles = set()  # Tiles to highlight
         self.tile_color = arcade.color.BLUE  # Color for movement tiles
+        self.turn_banner = ""
+        self.turn_banner_timer = 0.0
         
         arcade.set_background_color(arcade.color.BLACK)
 
@@ -197,6 +199,9 @@ class Game(arcade.Window):
         if not self.tactical_combat:
             return
 
+        if self.turn_banner_timer > 0 and self.turn_banner:
+            self._draw_turn_banner()
+
         # Draw UI panels
         left_panel = (10, self.height - 20, 260, 150)
         right_panel = (self.width - 270, self.height - 20, 260, 150)
@@ -261,6 +266,53 @@ class Game(arcade.Window):
 
         # No enemy text overlay to reduce clutter
 
+    def _draw_turn_banner(self):
+        """Draw temporary turn banner at center of screen."""
+        if not self.turn_banner:
+            return
+
+        width = self.width * 0.6
+        height = 70
+        left = (self.width - width) / 2
+        right = left + width
+        top = self.height * 0.67
+        bottom = top - height
+
+        # Soft dark background and border
+        arcade.draw_lrbt_rectangle_filled(
+            left=left,
+            right=right,
+            bottom=bottom,
+            top=top,
+            color=arcade.color.DARK_SLATE_GRAY,
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            left=left,
+            right=right,
+            bottom=bottom,
+            top=top,
+            color=arcade.color.WHITE,
+            border_width=3,
+        )
+
+        arcade.draw_text(
+            self.turn_banner,
+            self.width / 2,
+            bottom + height / 2 - 8,
+            arcade.color.WHITE,
+            20,
+            anchor_x="center",
+            anchor_y="center",
+            bold=True,
+            align="center",
+            width=int(width - 20),
+        )
+
+    def _show_turn_banner(self, text, duration=5.0):
+        """Show a temporary banner for turn messages."""
+        self.turn_banner = text
+        self.turn_banner_timer = duration
+
     def _draw_highlighted_tiles(self):
         """Draw highlighted movement and attack range tiles."""
         if self.tactical_combat.current_turn != "player" or not self.highlighted_tiles:
@@ -292,6 +344,13 @@ class Game(arcade.Window):
         elif self.phase == "combat":
             self._update_combat(delta_time)
 
+        # Update temporary combat banners
+        if self.turn_banner_timer > 0:
+            self.turn_banner_timer -= delta_time
+            if self.turn_banner_timer <= 0:
+                self.turn_banner_timer = 0
+                self.turn_banner = ""
+
     def _update_exploration(self, delta_time):
         """Update exploration phase.
         
@@ -309,10 +368,15 @@ class Game(arcade.Window):
         """Start the exploration phase."""
         self.exploration = ExplorationPhase(self.map, self.player)
         self.exploration.start_exploration()
-        
-        # Place player at random position
-        pos = self.exploration.random_character_position()
-        self.map.move_character(self.player, pos[0], pos[1])
+
+        # Place player at random valid free position
+        for _ in range(100):
+            pos = self.exploration.random_character_position()
+            if not self.map.is_occupied(pos[0], pos[1]):
+                self.map.move_character(self.player, pos[0], pos[1])
+                return
+        # fallback: keep current player position if no free tile found
+        self.map.move_character(self.player, self.player.position[0], self.player.position[1])
 
     def _transition_to_combat(self):
         """Transition from exploration to combat phase."""
@@ -326,6 +390,7 @@ class Game(arcade.Window):
         self.tactical_combat = TacticalCombat(self.player, self.enemies, self.map)
         self.selected_action = None
         self.highlighted_tiles = set()
+        self._show_turn_banner("Tour du joueur")
 
     def _update_combat(self, delta_time):
         """Update combat phase.
@@ -478,14 +543,18 @@ class Game(arcade.Window):
                 self.tactical_combat.end_player_turn()
                 self.selected_action = None
                 self.highlighted_tiles = set()
-                
+                self._show_turn_banner("Tour ennemi")
+
                 # Process enemy turns
                 self._process_all_enemy_turns()
     
     def _process_all_enemy_turns(self):
         """Process all enemy turns until player turn returns."""
+        started_enemy = self.tactical_combat.current_turn == "enemy"
         while self.tactical_combat.current_turn == "enemy":
             self.tactical_combat.process_enemy_turn()
+        if started_enemy and self.tactical_combat.current_turn == "player":
+            self._show_turn_banner("Tour du joueur")
     
     def on_mouse_press(self, x, y, button, modifiers):
         """Handle mouse click for tile selection in combat.

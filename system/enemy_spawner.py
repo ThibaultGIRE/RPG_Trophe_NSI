@@ -35,7 +35,8 @@ class Ennemy_Spawner:
             enemy_type_key = choice([k for k in stat_de_base.keys() if k != "player character"])
             enemy_type = {"type": enemy_type_key, "name": enemy_type_key, "attacks": []}
             enemy = self.spawn_enemies(enemy_type, enemy_level)
-            enemies.append(enemy)
+            if enemy:
+                enemies.append(enemy)
 
         return enemies
     
@@ -102,10 +103,12 @@ class Ennemy_Spawner:
         while not placed and attempts < 20:
             x = randint(0, self.map.width - 1)
             y = randint(0, self.map.height - 1)
-            if self.map.is_walkable(x, y):
-                self.map.place_character(enemy, x, y)
-                placed = True
+            if self.map.is_walkable(x, y) and not self.map.is_occupied(x, y):
+                placed = self.map.place_character(enemy, x, y)
             attempts += 1
+
+        if not placed:
+            return None
 
         return enemy
     

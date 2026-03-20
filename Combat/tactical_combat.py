@@ -241,6 +241,7 @@ class TacticalCombat:
             self.current_turn = "player"
             self.player_has_moved = False
             self.player_has_attacked = False
+            self.player_has_healed = False
             return {"type": "turn_end"}
         
         enemy = self.enemies[self.enemy_turn_index]

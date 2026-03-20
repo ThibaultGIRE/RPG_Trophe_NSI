@@ -101,17 +101,22 @@ class GameMap:
         }
 
     def _draw_dotted_rect(self, x1, y1, x2, y2, color, dash=8, gap=6):
-        # Draw dashed horizontal lines
-        for x in range(x1, x2, dash + gap):
+        # Draw dashed horizontal lines with float-safe iteration
+        x = x1
+        step = dash + gap
+        while x < x2:
             x_end = min(x + dash, x2)
             arcade.draw_line(x, y1, x_end, y1, color)
             arcade.draw_line(x, y2, x_end, y2, color)
+            x += step
 
-        # Draw dashed vertical lines
-        for y in range(y1, y2, dash + gap):
+        # Draw dashed vertical lines with float-safe iteration
+        y = y1
+        while y < y2:
             y_end = min(y + dash, y2)
             arcade.draw_line(x1, y, x1, y_end, color)
             arcade.draw_line(x2, y, x2, y_end, color)
+            y += step
 
     def is_walkable(self, x, y):
         if (x, y) in self.obstacles or x < 0 or y < 0 or x >= self.width or y >= self.height:
@@ -130,20 +135,27 @@ class GameMap:
         return neighbors
 
     def place_character(self, character, x, y):
-        if self.is_walkable(x, y):
-            self.entities[(x, y)] = character
-            character.position = (x, y)
+        if not self.is_walkable(x, y):
+            return False
+        if (x, y) in self.entities:
+            return False
+        self.entities[(x, y)] = character
+        character.position = (x, y)
+        return True
 
     def move_character(self, character, new_x, new_y):
         old_position = character.position
         if not self.is_walkable(new_x, new_y):
-            return
+            return False
         if (new_x, new_y) in self.entities and self.entities[(new_x, new_y)] is not character:
-            return
-        if old_position in self.entities:
+            return False
+
+        if old_position in self.entities and self.entities[old_position] is character:
             del self.entities[old_position]
+
         self.entities[(new_x, new_y)] = character
         character.position = (new_x, new_y)
+        return True
 
     def in_attack_range(self, attacker, defender):
         distance = abs(attacker.position[0] - defender.position[0]) + abs(attacker.position[1] - defender.position[1])
