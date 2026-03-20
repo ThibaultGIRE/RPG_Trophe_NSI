@@ -268,8 +268,9 @@ class TacticalCombat:
         
         result = {"enemy": enemy.name}
         
+        enemy_attack_range = enemy.attacks[0].range if enemy.attacks else 1
         # Attack if in range
-        if distance <= self.attack_range and self.player.is_alive():
+        if distance <= enemy_attack_range and self.player.is_alive():
             damage = self._resolve_attack(enemy, self.player)
             result.update({
                 "type": "attack",
@@ -278,19 +279,41 @@ class TacticalCombat:
                 "player_hp": self.player.hp
             })
         else:
-            # Move towards player
+            # Move towards player by up to enemy.move_range steps
             if distance > 1:
-                if abs(px - ex) > abs(py - ey):
-                    new_x = ex + (1 if px > ex else -1)
-                    new_y = ey
-                else:
-                    new_x = ex
-                    new_y = ey + (1 if py > ey else -1)
-                
-                if self.game_map.is_walkable(new_x, new_y) and not self.game_map.is_occupied(new_x, new_y):
-                    self.game_map.move_character(enemy, new_x, new_y)
+                steps = 0
+                moved = False
+                while steps < getattr(enemy, "move_range", 1) and distance > 1:
+                    if abs(px - ex) > abs(py - ey):
+                        new_x = ex + (1 if px > ex else -1)
+                        new_y = ey
+                    else:
+                        new_x = ex
+                        new_y = ey + (1 if py > ey else -1)
+
+                    if self.game_map.is_walkable(new_x, new_y) and not self.game_map.is_occupied(new_x, new_y):
+                        self.game_map.move_character(enemy, new_x, new_y)
+                        ex, ey = new_x, new_y
+                        distance = abs(px - ex) + abs(py - ey)
+                        moved = True
+                    else:
+                        # Try alternate neighbor if blocked
+                        found = False
+                        for nx, ny in self.game_map.get_neighbors(ex, ey):
+                            if not self.game_map.is_occupied(nx, ny):
+                                self.game_map.move_character(enemy, nx, ny)
+                                ex, ey = nx, ny
+                                distance = abs(px - ex) + abs(py - ey)
+                                found = True
+                                moved = True
+                                break
+                        if not found:
+                            break
+                    steps += 1
+
+                if moved:
                     result["type"] = "move"
-                    result.update({"to": (new_x, new_y)})
+                    result.update({"to": (ex, ey), "steps": steps})
                 else:
                     result["type"] = "no_action"
             else:

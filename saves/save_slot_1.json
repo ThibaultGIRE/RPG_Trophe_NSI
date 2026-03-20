@@ -1,17 +1,17 @@
 {
-  "saved_at": "2026-03-20 16:37:56",
+  "saved_at": "2026-03-20 17:00:41",
   "player": {
     "name": "Hero",
     "level": 1,
-    "hp": 4,
+    "hp": 14,
     "hp_max": 20,
     "attack": 7,
     "defense": 5,
     "speed": 6,
     "xp": 0,
     "position": [
-      9,
-      10
+      10,
+      4
     ],
     "attacks": [
       {
@@ -105,8 +105,8 @@
       "defense": 3,
       "speed": 3,
       "position": [
-        4,
-        3
+        6,
+        7
       ],
       "attacks": [
         {
@@ -116,19 +116,21 @@
           "special_effect": null,
           "base_damage": 6
         }
-      ]
+      ],
+      "is_boss": false,
+      "move_range": 4
     },
     {
-      "name": "boss_1",
-      "level": 1,
-      "hp": 45,
-      "hp_max": 50,
-      "attack": 15,
-      "defense": 10,
+      "name": "boss_3",
+      "level": 3,
+      "hp": 54,
+      "hp_max": 54,
+      "attack": 17,
+      "defense": 11,
       "speed": 10,
       "position": [
-        5,
-        8
+        7,
+        1
       ],
       "attacks": [
         {
@@ -136,9 +138,11 @@
           "precision": 80,
           "range": 1,
           "special_effect": null,
-          "base_damage": 6
+          "base_damage": 8
         }
-      ]
+      ],
+      "is_boss": false,
+      "move_range": 4
     }
   ],
   "phase": "save_menu"

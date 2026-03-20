@@ -242,7 +242,8 @@ class Game(arcade.Window):
         # Draw enemies
         for enemy in self.enemies:
             if enemy.is_alive():
-                self._draw_character_sprite(enemy, arcade.color.RED)
+                color = getattr(enemy, "color", arcade.color.RED)
+                self._draw_character_sprite(enemy, color)
 
     def _draw_character_sprite(self, character, color):
         """Draw a character sprite with HP bar.
@@ -664,6 +665,8 @@ class Game(arcade.Window):
                         }
                         for atk in enemy.attacks
                     ],
+                    "is_boss": getattr(enemy, "is_boss", False),
+                    "move_range": getattr(enemy, "move_range", 4),
                 }
                 for enemy in self.enemies
             ],
@@ -675,6 +678,30 @@ class Game(arcade.Window):
             json.dump(save_data, f, ensure_ascii=False, indent=2)
         self.save_message = f"Sauvegarde enregistrée dans slot {slot}!"
         self.save_message_timer = 2.0
+
+    def _find_first_walkable_empty_tile(self):
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                if self.map.is_walkable(x, y) and not self.map.is_occupied(x, y):
+                    return (x, y)
+        return None
+
+    def _place_entity(self, entity, position):
+        x, y = position
+        if self.map.place_character(entity, x, y):
+            return True
+
+        # Try to keep the entity on a nearby valid tile
+        for dy in range(-2, 3):
+            for dx in range(-2, 3):
+                nx, ny = x + dx, y + dy
+                if self.map.is_walkable(nx, ny) and not self.map.is_occupied(nx, ny):
+                    return self.map.place_character(entity, nx, ny)
+
+        fallback = self._find_first_walkable_empty_tile()
+        if fallback:
+            return self.map.place_character(entity, fallback[0], fallback[1])
+        return False
 
     def load_game(self, slot):
         slot_path = self._get_save_path(slot)
@@ -714,7 +741,11 @@ class Game(arcade.Window):
             player_attacks,
         )
         self.player.xp = player_data.get("xp", 0)
-        self.map.place_character(self.player, *self.player.position)
+        if not self._place_entity(self.player, self.player.position):
+            self.save_message = "Erreur: position de héros invalide, placement par défaut."
+            fallback = self._find_first_walkable_empty_tile()
+            if fallback:
+                self.map.place_character(self.player, fallback[0], fallback[1])
 
         self.enemies = []
         for enemy_data in save_data.get("enemies", []):
@@ -722,6 +753,8 @@ class Game(arcade.Window):
                 Attack(atk["name"], atk["precision"], atk["range"], atk.get("special_effect"), atk["base_damage"])
                 for atk in enemy_data.get("attacks", [])
             ]
+            is_boss = enemy_data.get("is_boss", False)
+            move_range = enemy_data.get("move_range", 4)
             enemy = Enemy(
                 enemy_data.get("name", "Ennemi"),
                 enemy_data.get("level", 1),
@@ -732,9 +765,12 @@ class Game(arcade.Window):
                 enemy_data.get("speed", 3),
                 tuple(enemy_data.get("position", [0, 0])),
                 enemy_attacks,
+                is_boss=is_boss,
+                move_range=move_range,
             )
-            self.map.place_character(enemy, *enemy.position)
-            self.enemies.append(enemy)
+            enemy.color = arcade.color.PURPLE if is_boss else arcade.color.RED
+            if self._place_entity(enemy, enemy.position):
+                self.enemies.append(enemy)
 
         self.phase = save_data.get("phase", "exploration")
         self.tactical_combat = None
@@ -744,6 +780,7 @@ class Game(arcade.Window):
         elif self.phase == "exploration":
             self.exploration = ExplorationPhase(self.map, self.player)
             self.exploration.start_exploration()
+
         self.selected_action = None
         self.highlighted_tiles = set()
         self.save_message = f"Sauvegarde slot {slot} chargée !"

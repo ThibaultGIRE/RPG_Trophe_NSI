@@ -1,3 +1,4 @@
+import arcade
 from Entities.Character import stat_de_base
 from Entities.Ennemy import Enemy
 from Entities.Attack import Attack
@@ -30,9 +31,12 @@ class Ennemy_Spawner:
         for _ in range(num_enemies):
             enemy_level = player_level + randint(-self.spawn_rules["level_variance"], self.spawn_rules["level_variance"])
             enemy_level = max(1, enemy_level)  # Ensure minimum level 1
-            
-            # pick a base enemy type from the stat table
-            enemy_type_key = choice([k for k in stat_de_base.keys() if k != "player character"])
+
+            if randint(1, 100) <= 20:
+                enemy_type_key = "boss"
+            else:
+                enemy_type_key = "base enemy"
+
             enemy_type = {"type": enemy_type_key, "name": enemy_type_key, "attacks": []}
             enemy = self.spawn_enemies(enemy_type, enemy_level)
             if enemy:
@@ -82,6 +86,10 @@ class Ennemy_Spawner:
         # Create basic attack
         basic_attack = Attack("Claw", 80, 1, None, 5 + level)
         
+        is_boss = enemy_type["type"] == "boss"
+        move_range = 3 if is_boss else 4
+        enemy_color = arcade.color.PURPLE if is_boss else arcade.color.RED
+
         enemy = Enemy(
             f"{enemy_type['name']}_{level}",
             level,
@@ -91,8 +99,11 @@ class Ennemy_Spawner:
             defense,
             speed,
             (0, 0),
-            [basic_attack]
+            [basic_attack],
+            is_boss=is_boss,
+            move_range=move_range
         )
+        enemy.color = enemy_color
         
         # Assign XP reward based on level
         enemy.xp_reward = 50 + (level * 10)

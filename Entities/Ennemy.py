@@ -1,9 +1,13 @@
+import arcade
 from Entities.Character import Personnage
 
 class Enemy(Personnage):
-    def __init__(self, nom, niveau, pv, pv_max, attack, defense, speed, position, attacks):
+    def __init__(self, nom, niveau, pv, pv_max, attack, defense, speed, position, attacks, is_boss=False, move_range=4):
         super().__init__(nom, niveau, pv, pv_max, attack, defense, speed, position, attacks)
         self.xp_reward = 50  # Default XP reward
+        self.is_boss = is_boss
+        self.move_range = move_range
+        self.color = arcade.color.PURPLE if is_boss else arcade.color.RED
 
     def decide_action(self, map, player):
         # let the class AiControler decide the action
