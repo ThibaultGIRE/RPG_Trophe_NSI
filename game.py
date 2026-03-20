@@ -1,4 +1,6 @@
 import arcade
+import warnings
+from arcade.exceptions import PerformanceWarning
 from Map.game_map import GameMap
 from system.enemy_spawner import Ennemy_Spawner
 from system.xp_system import XpSystem
@@ -6,6 +8,8 @@ from system.exploration_phase import ExplorationPhase
 from Entities.Player_character import PlayerCharacter
 from Entities.Attack import Attack
 from Combat.tactical_combat import TacticalCombat
+
+warnings.filterwarnings("ignore", category=PerformanceWarning)
 
 class Game(arcade.Window):
     def __init__(self):
@@ -295,10 +299,11 @@ class Game(arcade.Window):
             border_width=3,
         )
 
+        center_x = (left + right) / 2
         arcade.draw_text(
             self.turn_banner,
-            self.width / 2,
-            bottom + height / 2 - 8,
+            center_x,
+            bottom + height / 2,
             arcade.color.WHITE,
             20,
             anchor_x="center",
@@ -308,7 +313,7 @@ class Game(arcade.Window):
             width=int(width - 20),
         )
 
-    def _show_turn_banner(self, text, duration=5.0):
+    def _show_turn_banner(self, text, duration=2.0):
         """Show a temporary banner for turn messages."""
         self.turn_banner = text
         self.turn_banner_timer = duration
