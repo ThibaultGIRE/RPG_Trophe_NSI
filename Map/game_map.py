@@ -9,6 +9,10 @@ class GameMap:
         self.tile_width = tile_width
         self.tile_height = tile_height
 
+        # Extra rows usable only in combat around the map
+        self.extra_rows_top = 0
+        self.extra_rows_bottom = 0
+
         # Entities stored at grid coordinates
         self.entities = {}
 
@@ -24,19 +28,20 @@ class GameMap:
                 self.obstacles.add((x, y))
 
     def draw(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
+        total_rows = self.height + self.extra_rows_top + self.extra_rows_bottom
         if draw_width is None:
             draw_width = self.width * self.tile_width
         if draw_height is None:
-            draw_height = self.height * self.tile_height
+            draw_height = total_rows * self.tile_height
 
         scale_x = draw_width / (self.width * self.tile_width)
-        scale_y = draw_height / (self.height * self.tile_height)
+        scale_y = draw_height / (total_rows * self.tile_height)
         scale = min(scale_x, scale_y)
 
         tile_w = self.tile_width * scale
         tile_h = self.tile_height * scale
         total_width = tile_w * self.width
-        total_height = tile_h * self.height
+        total_height = tile_h * total_rows
 
         # Center map in provided rect
         offset_x = origin_x + (draw_width - total_width) / 2
@@ -51,12 +56,12 @@ class GameMap:
             color=arcade.color.DARK_SLATE_GRAY,
         )
 
-        # Draw each tile with dotted borders
+        # Draw each tile with dotted borders, including extra rows
         dot_color = arcade.color.LIGHT_GRAY
-        for y in range(self.height):
+        for y in range(-self.extra_rows_bottom, self.height + self.extra_rows_top):
             for x in range(self.width):
                 x1 = offset_x + x * tile_w
-                y1 = offset_y + y * tile_h
+                y1 = offset_y + (y + self.extra_rows_bottom) * tile_h
                 x2 = x1 + tile_w
                 y2 = y1 + tile_h
 
@@ -73,19 +78,20 @@ class GameMap:
                     )
 
     def get_draw_info(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
+        total_rows = self.height + self.extra_rows_top + self.extra_rows_bottom
         if draw_width is None:
             draw_width = self.width * self.tile_width
         if draw_height is None:
-            draw_height = self.height * self.tile_height
+            draw_height = total_rows * self.tile_height
 
         scale_x = draw_width / (self.width * self.tile_width)
-        scale_y = draw_height / (self.height * self.tile_height)
+        scale_y = draw_height / (total_rows * self.tile_height)
         scale = min(scale_x, scale_y)
 
         tile_w = self.tile_width * scale
         tile_h = self.tile_height * scale
         total_width = tile_w * self.width
-        total_height = tile_h * self.height
+        total_height = tile_h * total_rows
 
         offset_x = origin_x + (draw_width - total_width) / 2
         offset_y = origin_y + (draw_height - total_height) / 2
@@ -119,7 +125,11 @@ class GameMap:
             y += step
 
     def is_walkable(self, x, y):
-        if (x, y) in self.obstacles or x < 0 or y < 0 or x >= self.width or y >= self.height:
+        min_y = -self.extra_rows_bottom
+        max_y = self.height + self.extra_rows_top - 1
+        if (x, y) in self.obstacles:
+            return False
+        if x < 0 or x >= self.width or y < min_y or y > max_y:
             return False
         return True
 
@@ -142,6 +152,14 @@ class GameMap:
         self.entities[(x, y)] = character
         character.position = (x, y)
         return True
+
+    def set_combat_extra_rows(self, top_rows=0, bottom_rows=0):
+        self.extra_rows_top = top_rows
+        self.extra_rows_bottom = bottom_rows
+
+    def clear_combat_extra_rows(self):
+        self.extra_rows_top = 0
+        self.extra_rows_bottom = 0
 
     def move_character(self, character, new_x, new_y):
         old_position = character.position

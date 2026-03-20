@@ -130,12 +130,22 @@ class TacticalCombat:
         # Resolve attack
         damage = self._resolve_attack(self.player, target)
         self.player_has_attacked = True
-        
+
+        killed = False
+        xp_gain = 0
+        if not target.is_alive():
+            killed = True
+            xp_gain = 100
+            if target.position in self.game_map.entities:
+                del self.game_map.entities[target.position]
+
         return {
             "success": True,
             "target": target.name,
             "damage": damage,
-            "target_hp": target.hp
+            "target_hp": target.hp,
+            "killed": killed,
+            "xp_gain": xp_gain,
         }
 
     def player_heal(self):
