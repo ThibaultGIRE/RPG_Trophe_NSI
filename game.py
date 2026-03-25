@@ -20,42 +20,42 @@ class Game(arcade.Window):
         self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
         screen_width = self.map.width * self.map.tile_width
         screen_height = self.map.height * self.map.tile_height
-        super().__init__(screen_width, screen_height, "Tactical RPG - Turn Based Combat", resizable=True)
+        super().__init__(screen_width, screen_height, "Jeu RPG Tactique - Combat au Tour par Tour", resizable=True, fullscreen=True)
 
-        # Single playable character
+        # Personnage jouable unique
         self.player = self.create_player()
         self.enemies = []
         self.last_xp_gain = 0
 
-        # Game systems
+        # Systèmes de jeu
         self.tactical_combat = None
         self.exploration = None
         self.xp_system = XpSystem()
         self.spawner = Ennemy_Spawner(self.map)
 
-        # Save system
+        # Système de sauvegarde
         self.SAVE_SLOTS = 3
         self.save_folder = os.path.join(os.getcwd(), "saves")
         self._ensure_save_folder()
         self.previous_phase = "exploration"
 
-        # Game state
+        # État du jeu
         self.phase = "menu"  # "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
         self.in_combat = False
         
-        # Delete confirmation state
-        self.deleting_slot = None  # Slot number being considered for deletion (1-3)
+        # État de confirmation de suppression
+        self.deleting_slot = None  # Numéro de slot considéré pour suppression (1-3)
         
-        # Visual elements
+        # Éléments visuels
         self.player_sprite = None
         self.enemy_sprites = arcade.SpriteList()
         
         self.camera = None
         
-        # UI state
-        self.selected_action = None  # "move" or "attack"
-        self.highlighted_tiles = set()  # Tiles to highlight
-        self.tile_color = arcade.color.BLUE  # Color for movement tiles
+        # État de l'interface utilisateur
+        self.selected_action = None  # "move" ou "attack"
+        self.highlighted_tiles = set()  # Cases à mettre en surbrillance
+        self.tile_color = arcade.color.BLUE  # Couleur pour les cases de mouvement
         self.turn_banner = ""
         self.turn_banner_timer = 0.0
         self.save_message = ""
@@ -313,7 +313,7 @@ class Game(arcade.Window):
 
         # Draw action log
         y_offset = self.height - 50
-        arcade.draw_text("EXPLORATION PHASE", 10, y_offset, arcade.color.WHITE, 14, bold=True)
+        arcade.draw_text("PHASE D'EXPLORATION", 10, y_offset, arcade.color.WHITE, 14, bold=True)
         
         for i, action in enumerate(self.exploration.get_action_log()):
             arcade.draw_text(action, 10, y_offset - 25 - (i * 20), arcade.color.WHITE, 12)
@@ -361,7 +361,7 @@ class Game(arcade.Window):
         arcade.draw_lrbt_rectangle_outline(right_panel_left, right_panel_right, panel_bottom, panel_top, arcade.color.WHITE, 2)
 
         # Draw turn indicator near top center of map zone
-        turn_text = "PLAYER TURN" if self.tactical_combat.current_turn == "player" else "ENEMY TURN"
+        turn_text = "TOUR DU JOUEUR" if self.tactical_combat.current_turn == "player" else "TOUR ENNEMI"
         turn_color = arcade.color.LIGHT_GREEN if self.tactical_combat.current_turn == "player" else arcade.color.LIGHT_RED
         arcade.draw_text(turn_text, self.width / 2, self.height - 30, turn_color, 16, anchor_x="center", bold=True)
 
@@ -369,14 +369,14 @@ class Game(arcade.Window):
         controls_x = left_panel_left + 10
         controls_y = panel_top - 30
         arcade.draw_text("COMMANDES", controls_x, controls_y, arcade.color.AZURE, 14, bold=True)
-        arcade.draw_text("M: Move", controls_x, controls_y - 26, arcade.color.WHITE, 12)
-        arcade.draw_text("A: Attack", controls_x, controls_y - 46, arcade.color.WHITE, 12)
-        arcade.draw_text("H: Heal", controls_x, controls_y - 66, arcade.color.WHITE, 12)
-        arcade.draw_text("E: End Turn", controls_x, controls_y - 86, arcade.color.WHITE, 12)
-        arcade.draw_text("Esc: Quit", controls_x, controls_y - 106, arcade.color.WHITE, 12)
-        arcade.draw_text("S: Save Game", controls_x, controls_y - 126, arcade.color.WHITE, 12)
-        arcade.draw_text("L: Load Game", controls_x, controls_y - 146, arcade.color.WHITE, 12)
-        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", controls_x, controls_y - 170, arcade.color.LIGHT_GREEN, 12)
+        arcade.draw_text("M: Déplacer", controls_x, controls_y - 26, arcade.color.WHITE, 12)
+        arcade.draw_text("A: Attaquer", controls_x, controls_y - 46, arcade.color.WHITE, 12)
+        arcade.draw_text("H: Soigner", controls_x, controls_y - 66, arcade.color.WHITE, 12)
+        arcade.draw_text("E: Finir le tour", controls_x, controls_y - 86, arcade.color.WHITE, 12)
+        arcade.draw_text("Échap: Quitter", controls_x, controls_y - 106, arcade.color.WHITE, 12)
+        arcade.draw_text("S: Sauvegarder", controls_x, controls_y - 126, arcade.color.WHITE, 12)
+        arcade.draw_text("L: Charger", controls_x, controls_y - 146, arcade.color.WHITE, 12)
+        arcade.draw_text(f"Utilisations de soin: {self.tactical_combat.heal_uses}", controls_x, controls_y - 170, arcade.color.LIGHT_GREEN, 12)
         
         # Draw icons below commands
         icon_y = controls_y - 200
@@ -407,12 +407,12 @@ class Game(arcade.Window):
         # Hero stats on right side panel
         stats_x = right_panel_left + 10
         stats_y = panel_top - 30
-        arcade.draw_text("HERO STATS", stats_x, stats_y, arcade.color.AZURE, 14, bold=True)
-        arcade.draw_text(f"Level: {self.player.level}", stats_x, stats_y - 26, arcade.color.WHITE, 12)
-        arcade.draw_text(f"HP: {self.player.hp}/{self.player.hp_max}", stats_x, stats_y - 46, arcade.color.WHITE, 12)
+        arcade.draw_text("STATS DU HÉROS", stats_x, stats_y, arcade.color.AZURE, 14, bold=True)
+        arcade.draw_text(f"Niveau: {self.player.level}", stats_x, stats_y - 26, arcade.color.WHITE, 12)
+        arcade.draw_text(f"PV: {self.player.hp}/{self.player.hp_max}", stats_x, stats_y - 46, arcade.color.WHITE, 12)
         arcade.draw_text(f"ATK: {self.player.attack}", stats_x, stats_y - 66, arcade.color.WHITE, 12)
-        arcade.draw_text(f"DEF: {self.player.defense}", stats_x, stats_y - 86, arcade.color.WHITE, 12)
-        arcade.draw_text(f"SPD: {self.player.speed}", stats_x, stats_y - 106, arcade.color.WHITE, 12)
+        arcade.draw_text(f"DÉF: {self.player.defense}", stats_x, stats_y - 86, arcade.color.WHITE, 12)
+        arcade.draw_text(f"VIT: {self.player.speed}", stats_x, stats_y - 106, arcade.color.WHITE, 12)
 
         xp_required = self.xp_system.required_xp(self.player.level)
         xp_ratio = min(1.0, self.player.xp / xp_required if xp_required > 0 else 1.0)
@@ -427,7 +427,7 @@ class Game(arcade.Window):
 
         # Draw selected action above map
         if self.selected_action:
-            action_text = f"Selected: {self.selected_action.upper()}"
+            action_text = f"Sélectionné: {self.selected_action.upper()}"
             arcade.draw_text(action_text, self.width / 2, self.height - 60, arcade.color.YELLOW, 12, anchor_x="center")
 
         # Draw highlight tiles
@@ -617,15 +617,15 @@ class Game(arcade.Window):
         self.phase = "defeat"
 
     def _draw_menu(self):
-        arcade.draw_text("Tactical RPG", self.width / 2, self.height - 120, arcade.color.WHITE, 36, anchor_x="center")
-        arcade.draw_text("Press [ENTER] to Start", self.width / 2, self.height - 180, arcade.color.AZURE, 22, anchor_x="center")
-        arcade.draw_text("Press [ESCAPE] to Quit", self.width / 2, self.height - 220, arcade.color.ORANGE, 20, anchor_x="center")
-        arcade.draw_text("S: Save (in-game) | L: Load menu", self.width / 2, self.height - 260, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
+        arcade.draw_text("Jeu RPG Tactique", self.width / 2, self.height - 120, arcade.color.WHITE, 36, anchor_x="center")
+        arcade.draw_text("Appuyez sur [ENTRÉE] pour démarrer", self.width / 2, self.height - 180, arcade.color.AZURE, 22, anchor_x="center")
+        arcade.draw_text("Appuyez sur [ÉCHAP] pour quitter", self.width / 2, self.height - 220, arcade.color.ORANGE, 20, anchor_x="center")
+        arcade.draw_text("S: Sauvegarder | L: Menu de chargement", self.width / 2, self.height - 260, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
         if self._any_save_exists():
-            arcade.draw_text("Sauvegardes existantes: appuyez sur [ENTER] pour choisir un slot", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
+            arcade.draw_text("Sauvegardes existantes: appuyez sur [ENTRÉE] pour choisir un slot", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
             arcade.draw_text("Dans le menu de chargement, 1-3 pour charger immédiatement (1 appui) ou N pour nouvelle partie", self.width / 2, self.height - 330, arcade.color.LIGHT_GRAY, 14, anchor_x="center")
         else:
-            arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTER] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
+            arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTRÉE] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
 
     def _draw_load_menu(self):
         title = "Choisissez un emplacement de sauvegarde"
@@ -654,14 +654,14 @@ class Game(arcade.Window):
             
             if info:
                 saved_at = info.get("saved_at", "?")
-                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} HP {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
+                arcade.draw_text(f"{slot}) {info['name']} Nv {info['level']} PV {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
             else:
                 arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
         
         if self.deleting_slot == -1:
-            arcade.draw_text("1-3: Supprimer | D ou ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+            arcade.draw_text("1-3: Supprimer | D ou ÉCHAP: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
         else:
-            arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+            arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ÉCHAP: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
 
     def _draw_save_menu(self):
         arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
@@ -670,10 +670,10 @@ class Game(arcade.Window):
             y = self.height - 180 - slot * 40
             if info:
                 saved_at = info.get("saved_at", "?")
-                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} - REMPLACE ({saved_at})", self.width / 2, y, arcade.color.ORANGE, 14, anchor_x="center")
+                arcade.draw_text(f"{slot}) {info['name']} Nv {info['level']} - REMPLACE ({saved_at})", self.width / 2, y, arcade.color.ORANGE, 14, anchor_x="center")
             else:
                 arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.LIGHT_GREEN, 16, anchor_x="center")
-        arcade.draw_text("1-3: Sauvegarder | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+        arcade.draw_text("1-3: Sauvegarder | ÉCHAP: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
 
     def save_game(self, slot):
         self._ensure_save_folder()
