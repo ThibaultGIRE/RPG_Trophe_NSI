@@ -26,7 +26,7 @@ class TacticalCombat:
         self.movement_range = 5  # Player can move up to 5 tiles per turn
         self.attack_range = 1  # Default attack range
         self.heal_amount = 10
-        self.heal_uses = self.player.level * 4
+        self.heal_uses = 4  # Fixed 4 heals per combat
         
     def get_movement_tiles(self):
         """Calculate all tiles within movement range from player position.
@@ -98,6 +98,16 @@ class TacticalCombat:
 
         self.game_map.move_character(self.player, new_x, new_y)
         self.player_has_moved = True
+        
+        # Check if player stepped on heal station - restore half of heal potions
+        if self.game_map.heal_station == (new_x, new_y):
+            missing = 4 - self.heal_uses  # Calculate how many heals are missing
+            if missing > 0:
+                restored = max(1, missing // 2)  # Restore at least 1, up to half of missing
+                self.heal_uses = min(4, self.heal_uses + restored)
+                # Remove heal station after use
+                self.game_map.heal_station = None
+        
         return True
     
     def player_attack(self, target_x, target_y):

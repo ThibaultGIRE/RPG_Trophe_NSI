@@ -104,7 +104,7 @@ class Game(arcade.Window):
 
     def _has_save_slot(self, slot):
         return os.path.exists(self._get_save_path(slot))
-
+    
     def _any_save_exists(self):
         return any(self._has_save_slot(slot) for slot in range(1, self.SAVE_SLOTS + 1))
 
@@ -140,6 +140,14 @@ class Game(arcade.Window):
 
         self.player.hp = self.player.hp_max
         self.map.entities.clear()
+        
+        # Regenerate heal station for new game
+        self.map.heal_station = None
+        self.map._generate_heal_station()
+        
+        # Reinitialize spawner to analyze obstacles
+        self.spawner.initialize_spawn_system()
+        
         start_x, start_y = 0, 0
         while not self.map.is_walkable(start_x, start_y):
             start_x += 1
@@ -366,7 +374,35 @@ class Game(arcade.Window):
         arcade.draw_text("H: Heal", controls_x, controls_y - 66, arcade.color.WHITE, 12)
         arcade.draw_text("E: End Turn", controls_x, controls_y - 86, arcade.color.WHITE, 12)
         arcade.draw_text("Esc: Quit", controls_x, controls_y - 106, arcade.color.WHITE, 12)
-        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", controls_x, controls_y - 130, arcade.color.LIGHT_GREEN, 12)
+        arcade.draw_text("S: Save Game", controls_x, controls_y - 126, arcade.color.WHITE, 12)
+        arcade.draw_text("L: Load Game", controls_x, controls_y - 146, arcade.color.WHITE, 12)
+        arcade.draw_text(f"Heal uses: {self.tactical_combat.heal_uses}", controls_x, controls_y - 170, arcade.color.LIGHT_GREEN, 12)
+        
+        # Draw icons below commands
+        icon_y = controls_y - 200
+        arcade.draw_text("LÉGENDE", controls_x, icon_y, arcade.color.AZURE, 14, bold=True)
+        
+        # Enemy icon (red circle)
+        icon_x = controls_x + 10
+        icon_y -= 30
+        arcade.draw_circle_filled(icon_x, icon_y, 10, arcade.color.RED)
+        arcade.draw_text("Ennemi", icon_x + 15, icon_y - 5, arcade.color.WHITE, 11)
+        
+        # Boss icon (purple circle with border)
+        icon_y -= 25
+        arcade.draw_circle_outline(icon_x, icon_y, 12, arcade.color.PURPLE, 3)
+        arcade.draw_circle_filled(icon_x, icon_y, 10, arcade.color.PURPLE)
+        arcade.draw_text("Boss", icon_x + 15, icon_y - 5, arcade.color.WHITE, 11)
+        
+        # Obstacle icon (gray square)
+        icon_y -= 25
+        arcade.draw_lrbt_rectangle_filled(icon_x - 8, icon_x + 8, icon_y - 8, icon_y + 8, arcade.color.GRAY)
+        arcade.draw_text("Obstacle", icon_x + 15, icon_y - 5, arcade.color.WHITE, 11)
+        
+        # Heal station icon (light green circle)
+        icon_y -= 25
+        arcade.draw_circle_filled(icon_x, icon_y, 10, arcade.color.LIGHT_GREEN)
+        arcade.draw_text("Station de soin", icon_x + 15, icon_y - 5, arcade.color.LIGHT_GREEN, 11)
 
         # Hero stats on right side panel
         stats_x = right_panel_left + 10
@@ -595,12 +631,9 @@ class Game(arcade.Window):
         title = "Choisissez un emplacement de sauvegarde"
         title_color = arcade.color.WHITE
         
-        # Show confirmation dialog if deleting
-        if self.deleting_slot and self.deleting_slot > 0:
-            title = f"Supprimer la sauvegarde slot {self.deleting_slot} ?"
-            title_color = arcade.color.RED
-        elif self.deleting_slot == -1:
-            title = "Sélectionnez un slot à supprimer"
+        # Show delete mode indicator
+        if self.deleting_slot == -1:
+            title = "MODE SUPPRESSION - Appuyez sur 1, 2 ou 3"
             title_color = arcade.color.ORANGE
         
         arcade.draw_text(title, self.width / 2, self.height - 120, title_color, 28, anchor_x="center")
@@ -609,17 +642,8 @@ class Game(arcade.Window):
             info = self._read_slot_info(slot)
             y = self.height - 180 - slot * 40
             
-            # Highlight slot being deleted or selectable for deletion
-            if self.deleting_slot == slot:
-                arcade.draw_lrbt_rectangle_filled(
-                    left=self.width / 2 - 250,
-                    right=self.width / 2 + 250,
-                    bottom=y - 12,
-                    top=y + 12,
-                    color=arcade.color.DARK_RED
-                )
-            elif self.deleting_slot == -1 and info:
-                # Highlight all slots that have saves when in delete selection mode
+            # Highlight slots in delete mode
+            if self.deleting_slot == -1 and info:
                 arcade.draw_lrbt_rectangle_filled(
                     left=self.width / 2 - 250,
                     right=self.width / 2 + 250,
@@ -634,12 +658,10 @@ class Game(arcade.Window):
             else:
                 arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
         
-        if self.deleting_slot and self.deleting_slot > 0:
-            arcade.draw_text("ENTER: Confirmer | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
-        elif self.deleting_slot == -1:
-            arcade.draw_text("1-3: Sélectionner | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+        if self.deleting_slot == -1:
+            arcade.draw_text("1-3: Supprimer | D ou ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
         else:
-            arcade.draw_text("1-3: Charger | D puis 1-3: Supprimer | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+            arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
 
     def _draw_save_menu(self):
         arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
@@ -763,9 +785,17 @@ class Game(arcade.Window):
         )
         self.player.xp = player_data.get("xp", 0)
 
-        # Regenerate a new map
+        # Regenerate a new map with heal station
         self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
         self.map.entities.clear()
+        
+        # Ensure heal station is generated
+        if not self.map.heal_station:
+            self.map._generate_heal_station()
+
+        # Update spawner with new map and reinitialize
+        self.spawner.map = self.map
+        self.spawner.initialize_spawn_system()
 
         # Place player on a valid tile
         start_x, start_y = 0, 0
@@ -813,31 +843,27 @@ class Game(arcade.Window):
             return
 
         if self.phase == "load_menu":
-            # Handle delete confirmation mode
-            if self.deleting_slot is not None:
-                if key == arcade.key.ENTER or key == arcade.key.RETURN:
-                    self.delete_game(self.deleting_slot)
-                    return
-                if key == arcade.key.ESCAPE:
+            # Handle ESC to cancel delete mode
+            if key == arcade.key.ESCAPE:
+                if self.deleting_slot is not None:
                     self.deleting_slot = None
                     return
+                self.phase = "menu"
                 return
             
-            # Handle D key to enter delete mode
+            # Handle D key to toggle delete mode
             if key == arcade.key.D:
-                # Enter delete mode (user will then press 1/2/3 to select slot)
-                self.deleting_slot = -1  # -1 indicates delete mode is active but no slot selected yet
+                self.deleting_slot = -1 if self.deleting_slot is None else None
                 return
             
-            # In delete mode, selecting a slot
+            # In delete mode, pressing 1/2/3 deletes the slot directly
             if self.deleting_slot == -1 and key in [arcade.key.KEY_1, arcade.key.KEY_2, arcade.key.KEY_3]:
                 slot = 1 if key == arcade.key.KEY_1 else 2 if key == arcade.key.KEY_2 else 3
                 if self._has_save_slot(slot):
-                    self.deleting_slot = slot
+                    self.delete_game(slot)
                 else:
                     self.save_message = f"Aucune sauvegarde dans le slot {slot}."
                     self.save_message_timer = 2.0
-                    self.deleting_slot = None
                 return
             
             # Load game normally (only if not in delete mode)

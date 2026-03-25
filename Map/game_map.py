@@ -19,6 +19,10 @@ class GameMap:
         # Generate obstacles randomly for a simple map
         self.obstacles = set()
         self._generate_obstacles(obstacle_count)
+        
+        # Heal station position (green circle that restores heal potions)
+        self.heal_station = None
+        self._generate_heal_station()
 
     def _generate_obstacles(self, obstacle_count):
         for _ in range(obstacle_count):
@@ -26,6 +30,17 @@ class GameMap:
             y = random.randint(0, self.height - 1)
             if (x, y) not in self.obstacles:
                 self.obstacles.add((x, y))
+    
+    def _generate_heal_station(self):
+        """Generate a heal station at a random valid position."""
+        for _ in range(100):
+            x = random.randint(0, self.width - 1)
+            y = random.randint(0, self.height - 1)
+            if (x, y) not in self.obstacles:
+                self.heal_station = (x, y)
+                return
+        # Fallback: center of map if no valid position found
+        self.heal_station = (self.width // 2, self.height // 2)
 
     def draw(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
         total_rows = self.height + self.extra_rows_top + self.extra_rows_bottom
@@ -76,6 +91,13 @@ class GameMap:
                         top=y2 - 2,
                         color=arcade.color.GRAY,
                     )
+                
+                # Draw heal station (green circle)
+                if self.heal_station and (x, y) == self.heal_station:
+                    center_x = x1 + tile_w / 2
+                    center_y = y1 + tile_h / 2
+                    radius = min(tile_w, tile_h) / 3
+                    arcade.draw_circle_filled(center_x, center_y, radius, arcade.color.LIGHT_GREEN)
 
     def get_draw_info(self, origin_x=0, origin_y=0, draw_width=None, draw_height=None):
         total_rows = self.height + self.extra_rows_top + self.extra_rows_bottom
