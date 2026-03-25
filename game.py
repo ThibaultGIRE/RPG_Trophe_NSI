@@ -43,6 +43,9 @@ class Game(arcade.Window):
         self.phase = "menu"  # "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
         self.in_combat = False
         
+        # Delete confirmation state
+        self.deleting_slot = None  # Slot number being considered for deletion (1-3)
+        
         # Visual elements
         self.player_sprite = None
         self.enemy_sprites = arcade.SpriteList()
@@ -589,16 +592,54 @@ class Game(arcade.Window):
             arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTER] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
 
     def _draw_load_menu(self):
-        arcade.draw_text("Choisissez un emplacement de sauvegarde", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
+        title = "Choisissez un emplacement de sauvegarde"
+        title_color = arcade.color.WHITE
+        
+        # Show confirmation dialog if deleting
+        if self.deleting_slot and self.deleting_slot > 0:
+            title = f"Supprimer la sauvegarde slot {self.deleting_slot} ?"
+            title_color = arcade.color.RED
+        elif self.deleting_slot == -1:
+            title = "Sélectionnez un slot à supprimer"
+            title_color = arcade.color.ORANGE
+        
+        arcade.draw_text(title, self.width / 2, self.height - 120, title_color, 28, anchor_x="center")
+        
         for slot in range(1, self.SAVE_SLOTS + 1):
             info = self._read_slot_info(slot)
             y = self.height - 180 - slot * 40
+            
+            # Highlight slot being deleted or selectable for deletion
+            if self.deleting_slot == slot:
+                arcade.draw_lrbt_rectangle_filled(
+                    left=self.width / 2 - 250,
+                    right=self.width / 2 + 250,
+                    bottom=y - 12,
+                    top=y + 12,
+                    color=arcade.color.DARK_RED
+                )
+            elif self.deleting_slot == -1 and info:
+                # Highlight all slots that have saves when in delete selection mode
+                arcade.draw_lrbt_rectangle_filled(
+                    left=self.width / 2 - 250,
+                    right=self.width / 2 + 250,
+                    bottom=y - 12,
+                    top=y + 12,
+                    color=arcade.color.DARK_ORANGE
+                )
+            
             if info:
                 saved_at = info.get("saved_at", "?")
                 arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} HP {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
             else:
                 arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
-        arcade.draw_text("1-3: Charger | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+        
+        if self.deleting_slot and self.deleting_slot > 0:
+            arcade.draw_text("ENTER: Confirmer | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+        elif self.deleting_slot == -1:
+            arcade.draw_text("1-3: Sélectionner | ESC: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+        else:
+            arcade.draw_text("1-3: Charger | D puis 1-3: Supprimer | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
 
     def _draw_save_menu(self):
         arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
@@ -668,6 +709,30 @@ class Game(arcade.Window):
         if fallback:
             return self.map.place_character(entity, fallback[0], fallback[1])
         return False
+
+    def delete_game(self, slot):
+        """Delete a save game file.
+        
+        Args:
+            slot: Slot number to delete (1-3)
+        """
+        slot_path = self._get_save_path(slot)
+        if not os.path.exists(slot_path):
+            self.save_message = f"Aucune sauvegarde dans le slot {slot}."
+            self.save_message_timer = 2.0
+            return False
+        
+        try:
+            os.remove(slot_path)
+            self.save_message = f"Sauvegarde slot {slot} supprimée !"
+            self.save_message_timer = 2.0
+            self.deleting_slot = None
+            return True
+        except Exception as e:
+            self.save_message = f"Erreur lors de la suppression: {e}"
+            self.save_message_timer = 2.0
+            self.deleting_slot = None
+            return False
 
     def load_game(self, slot):
         slot_path = self._get_save_path(slot)
@@ -748,23 +813,52 @@ class Game(arcade.Window):
             return
 
         if self.phase == "load_menu":
-            if key == arcade.key.KEY_1:
-                slot = 1
-            elif key == arcade.key.KEY_2:
-                slot = 2
-            elif key == arcade.key.KEY_3:
-                slot = 3
-            else:
-                slot = None
+            # Handle delete confirmation mode
+            if self.deleting_slot is not None:
+                if key == arcade.key.ENTER or key == arcade.key.RETURN:
+                    self.delete_game(self.deleting_slot)
+                    return
+                if key == arcade.key.ESCAPE:
+                    self.deleting_slot = None
+                    return
+                return
+            
+            # Handle D key to enter delete mode
+            if key == arcade.key.D:
+                # Enter delete mode (user will then press 1/2/3 to select slot)
+                self.deleting_slot = -1  # -1 indicates delete mode is active but no slot selected yet
+                return
+            
+            # In delete mode, selecting a slot
+            if self.deleting_slot == -1 and key in [arcade.key.KEY_1, arcade.key.KEY_2, arcade.key.KEY_3]:
+                slot = 1 if key == arcade.key.KEY_1 else 2 if key == arcade.key.KEY_2 else 3
+                if self._has_save_slot(slot):
+                    self.deleting_slot = slot
+                else:
+                    self.save_message = f"Aucune sauvegarde dans le slot {slot}."
+                    self.save_message_timer = 2.0
+                    self.deleting_slot = None
+                return
+            
+            # Load game normally (only if not in delete mode)
+            if self.deleting_slot is None:
+                if key == arcade.key.KEY_1:
+                    slot = 1
+                elif key == arcade.key.KEY_2:
+                    slot = 2
+                elif key == arcade.key.KEY_3:
+                    slot = 3
+                else:
+                    slot = None
 
-            if slot is not None:
-                if self.load_game(slot):
-                    # phase is restored by load_game
-                    pass
-                return
-            if key == arcade.key.N:
-                self._start_new_game()
-                return
+                if slot is not None:
+                    if self.load_game(slot):
+                        # phase is restored by load_game
+                        pass
+                    return
+                if key == arcade.key.N:
+                    self._start_new_game()
+                    return
             return
 
         if self.phase == "save_menu":

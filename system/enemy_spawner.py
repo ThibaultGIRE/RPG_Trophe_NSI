@@ -117,10 +117,11 @@ class Ennemy_Spawner:
         # Try to place enemy on map
         placed = False
         attempts = 0
-        while not placed and attempts < 20:
+        while not placed and attempts < 100:
             x = randint(0, self.map.width - 1)
             y = randint(0, self.map.height - 1)
-            if self.map.is_walkable(x, y) and not self.map.is_occupied(x, y):
+            # Explicitly check that position is not an obstacle and is walkable
+            if (x, y) not in self.map.obstacles and self.map.is_walkable(x, y) and not self.map.is_occupied(x, y):
                 placed = self.map.place_character(enemy, x, y)
             attempts += 1
 
