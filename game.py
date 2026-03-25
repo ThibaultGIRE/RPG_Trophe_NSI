@@ -119,7 +119,6 @@ class Game(arcade.Window):
                     "hp": player.get("hp", 0),
                     "hp_max": player.get("hp_max", 0),
                     "xp": player.get("xp", 0),
-                    "phase": data.get("phase", "exploration"),
                     "saved_at": data.get("saved_at", "?")
                 }
         except Exception:
@@ -585,7 +584,7 @@ class Game(arcade.Window):
         arcade.draw_text("S: Save (in-game) | L: Load menu", self.width / 2, self.height - 260, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
         if self._any_save_exists():
             arcade.draw_text("Sauvegardes existantes: appuyez sur [ENTER] pour choisir un slot", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
-            arcade.draw_text("Dans le menu de chargement, 1-3 pour charger un slot ou N pour nouvelle partie", self.width / 2, self.height - 330, arcade.color.LIGHT_GRAY, 14, anchor_x="center")
+            arcade.draw_text("Dans le menu de chargement, 1-3 pour charger immédiatement (1 appui) ou N pour nouvelle partie", self.width / 2, self.height - 330, arcade.color.LIGHT_GRAY, 14, anchor_x="center")
         else:
             arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTER] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
 
@@ -596,7 +595,7 @@ class Game(arcade.Window):
             y = self.height - 180 - slot * 40
             if info:
                 saved_at = info.get("saved_at", "?")
-                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} HP {info['hp']}/{info['hp_max']} XP {info['xp']} Phase {info['phase']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
+                arcade.draw_text(f"{slot}) {info['name']} Lv {info['level']} HP {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
             else:
                 arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
         arcade.draw_text("1-3: Charger | N: Nouvelle partie | ESC: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
@@ -615,6 +614,7 @@ class Game(arcade.Window):
 
     def save_game(self, slot):
         self._ensure_save_folder()
+        # Save only player stats
         save_data = {
             "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "player": {
@@ -626,7 +626,6 @@ class Game(arcade.Window):
                 "defense": self.player.defense,
                 "speed": self.player.speed,
                 "xp": self.player.xp,
-                "position": list(self.player.position),
                 "attacks": [
                     {
                         "name": atk.name,
@@ -638,39 +637,6 @@ class Game(arcade.Window):
                     for atk in self.player.attacks
                 ],
             },
-            "map": {
-                "width": self.map.width,
-                "height": self.map.height,
-                "tile_width": self.map.tile_width,
-                "tile_height": self.map.tile_height,
-                "obstacles": [list(o) for o in self.map.obstacles],
-            },
-            "enemies": [
-                {
-                    "name": enemy.name,
-                    "level": enemy.level,
-                    "hp": enemy.hp,
-                    "hp_max": enemy.hp_max,
-                    "attack": enemy.attack,
-                    "defense": enemy.defense,
-                    "speed": enemy.speed,
-                    "position": list(enemy.position),
-                    "attacks": [
-                        {
-                            "name": atk.name,
-                            "precision": atk.precision,
-                            "range": atk.range,
-                            "special_effect": atk.special_effect,
-                            "base_damage": atk.base_damage,
-                        }
-                        for atk in enemy.attacks
-                    ],
-                    "is_boss": getattr(enemy, "is_boss", False),
-                    "move_range": getattr(enemy, "move_range", 4),
-                }
-                for enemy in self.enemies
-            ],
-            "phase": self.phase,
         }
 
         slot_path = self._get_save_path(slot)
@@ -713,17 +679,7 @@ class Game(arcade.Window):
         with open(slot_path, "r", encoding="utf-8") as f:
             save_data = json.load(f)
 
-        map_data = save_data.get("map", {})
-        self.map = GameMap(
-            width=map_data.get("width", 14),
-            height=map_data.get("height", 10),
-            tile_width=map_data.get("tile_width", 64),
-            tile_height=map_data.get("tile_height", 64),
-            obstacle_count=0,
-        )
-        self.map.obstacles = set(tuple(x) for x in map_data.get("obstacles", []))
-        self.map.entities.clear()
-
+        # Load player stats only
         player_data = save_data.get("player", {})
         player_attacks = [
             Attack(atk["name"], atk["precision"], atk["range"], atk.get("special_effect"), atk["base_damage"])
@@ -737,52 +693,38 @@ class Game(arcade.Window):
             player_data.get("attack", 7),
             player_data.get("defense", 5),
             player_data.get("speed", 6),
-            tuple(player_data.get("position", [0, 0])),
+            (0, 0),  # Temporary position, will be placed later
             player_attacks,
         )
         self.player.xp = player_data.get("xp", 0)
-        if not self._place_entity(self.player, self.player.position):
-            self.save_message = "Erreur: position de héros invalide, placement par défaut."
-            fallback = self._find_first_walkable_empty_tile()
-            if fallback:
-                self.map.place_character(self.player, fallback[0], fallback[1])
 
-        self.enemies = []
-        for enemy_data in save_data.get("enemies", []):
-            enemy_attacks = [
-                Attack(atk["name"], atk["precision"], atk["range"], atk.get("special_effect"), atk["base_damage"])
-                for atk in enemy_data.get("attacks", [])
-            ]
-            is_boss = enemy_data.get("is_boss", False)
-            move_range = enemy_data.get("move_range", 4)
-            enemy = Enemy(
-                enemy_data.get("name", "Ennemi"),
-                enemy_data.get("level", 1),
-                enemy_data.get("hp", 15),
-                enemy_data.get("hp_max", 15),
-                enemy_data.get("attack", 7),
-                enemy_data.get("defense", 3),
-                enemy_data.get("speed", 3),
-                tuple(enemy_data.get("position", [0, 0])),
-                enemy_attacks,
-                is_boss=is_boss,
-                move_range=move_range,
-            )
-            enemy.color = arcade.color.PURPLE if is_boss else arcade.color.RED
-            if self._place_entity(enemy, enemy.position):
-                self.enemies.append(enemy)
+        # Regenerate a new map
+        self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
+        self.map.entities.clear()
 
-        self.phase = save_data.get("phase", "exploration")
+        # Place player on a valid tile
+        start_x, start_y = 0, 0
+        while not self.map.is_walkable(start_x, start_y):
+            start_x += 1
+            if start_x >= self.map.width:
+                start_x = 0
+                start_y += 1
+        self.map.place_character(self.player, start_x, start_y)
+
+        # Spawn enemies based on player level
+        self.enemies = self.spawner.spawn_wave(self.player.level)
+
+        # Start in exploration phase
+        self.phase = "exploration"
         self.tactical_combat = None
         self.exploration = None
-        if self.phase == "combat":
-            self.tactical_combat = TacticalCombat(self.player, self.enemies, self.map)
-        elif self.phase == "exploration":
-            self.exploration = ExplorationPhase(self.map, self.player)
-            self.exploration.start_exploration()
-
         self.selected_action = None
         self.highlighted_tiles = set()
+        self.last_xp_gain = 0
+
+        # Start exploration
+        self._start_exploration()
+
         self.save_message = f"Sauvegarde slot {slot} chargée !"
         self.save_message_timer = 2.0
         return True

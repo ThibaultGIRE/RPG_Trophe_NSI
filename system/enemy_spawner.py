@@ -28,11 +28,15 @@ class Ennemy_Spawner:
         num_enemies = self._calculate_enemy_count(player_level)
         enemies = []
 
+        boss_limit = min(2, max(0, (num_enemies - 1) // 2))
+        boss_count = 0
+
         for _ in range(num_enemies):
             enemy_level = player_level + randint(-self.spawn_rules["level_variance"], self.spawn_rules["level_variance"])
-            enemy_level = max(1, enemy_level)  # Ensure minimum level 1
+            enemy_level = max(1, enemy_level)
 
-            if randint(1, 100) <= 20:
+            is_boss_roll = randint(1, 100) <= 20
+            if is_boss_roll and boss_count < boss_limit:
                 enemy_type_key = "boss"
             else:
                 enemy_type_key = "base enemy"
@@ -40,6 +44,8 @@ class Ennemy_Spawner:
             enemy_type = {"type": enemy_type_key, "name": enemy_type_key, "attacks": []}
             enemy = self.spawn_enemies(enemy_type, enemy_level)
             if enemy:
+                if enemy_type_key == "boss":
+                    boss_count += 1
                 enemies.append(enemy)
 
         return enemies

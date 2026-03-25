@@ -1,17 +1,17 @@
 {
-  "saved_at": "2026-03-20 17:00:41",
+  "saved_at": "2026-03-22 19:23:05",
   "player": {
     "name": "Hero",
     "level": 1,
-    "hp": 14,
+    "hp": 20,
     "hp_max": 20,
     "attack": 7,
     "defense": 5,
     "speed": 6,
     "xp": 0,
     "position": [
-      10,
-      4
+      7,
+      5
     ],
     "attacks": [
       {
@@ -30,72 +30,178 @@
     "tile_height": 64,
     "obstacles": [
       [
-        6,
-        2
-      ],
-      [
-        1,
-        2
-      ],
-      [
         12,
+        4
+      ],
+      [
+        11,
         7
       ],
       [
         3,
-        4
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        1,
         8
       ],
       [
-        3,
-        0
-      ],
-      [
-        7,
-        9
-      ],
-      [
-        9,
-        5
-      ],
-      [
-        11,
+        1,
         2
       ],
       [
-        13,
-        9
-      ],
-      [
-        2,
-        6
-      ],
-      [
-        3,
-        9
+        9,
+        0
       ],
       [
         10,
-        9
+        5
+      ],
+      [
+        13,
+        7
       ],
       [
         4,
         1
+      ],
+      [
+        12,
+        0
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        8,
+        6
+      ],
+      [
+        13,
+        2
+      ],
+      [
+        5,
+        9
+      ],
+      [
+        1,
+        3
       ],
       [
         4,
         7
       ]
+    ],
+    "entities": [
+      {
+        "type": "player",
+        "name": "Hero",
+        "position": [
+          7,
+          5
+        ]
+      },
+      {
+        "type": "enemy",
+        "name": "boss_1",
+        "is_boss": true,
+        "move_range": 3,
+        "position": [
+          9,
+          4
+        ]
+      },
+      {
+        "type": "enemy",
+        "name": "base enemy_2",
+        "is_boss": false,
+        "move_range": 4,
+        "position": [
+          8,
+          1
+        ]
+      },
+      {
+        "type": "enemy",
+        "name": "base enemy_1",
+        "is_boss": false,
+        "move_range": 4,
+        "position": [
+          10,
+          1
+        ]
+      },
+      {
+        "type": "enemy",
+        "name": "base enemy_4",
+        "is_boss": false,
+        "move_range": 4,
+        "position": [
+          8,
+          9
+        ]
+      }
     ]
   },
   "enemies": [
+    {
+      "name": "boss_1",
+      "level": 1,
+      "hp": 50,
+      "hp_max": 50,
+      "attack": 15,
+      "defense": 10,
+      "speed": 10,
+      "position": [
+        9,
+        4
+      ],
+      "attacks": [
+        {
+          "name": "Claw",
+          "precision": 80,
+          "range": 1,
+          "special_effect": null,
+          "base_damage": 6
+        }
+      ],
+      "is_boss": true,
+      "move_range": 3
+    },
+    {
+      "name": "base enemy_2",
+      "level": 2,
+      "hp": 17,
+      "hp_max": 17,
+      "attack": 8,
+      "defense": 3,
+      "speed": 3,
+      "position": [
+        8,
+        1
+      ],
+      "attacks": [
+        {
+          "name": "Claw",
+          "precision": 80,
+          "range": 1,
+          "special_effect": null,
+          "base_damage": 7
+        }
+      ],
+      "is_boss": false,
+      "move_range": 4
+    },
     {
       "name": "base enemy_1",
       "level": 1,
@@ -105,8 +211,8 @@
       "defense": 3,
       "speed": 3,
       "position": [
-        6,
-        7
+        10,
+        1
       ],
       "attacks": [
         {
@@ -121,16 +227,16 @@
       "move_range": 4
     },
     {
-      "name": "boss_3",
-      "level": 3,
-      "hp": 54,
-      "hp_max": 54,
-      "attack": 17,
-      "defense": 11,
-      "speed": 10,
+      "name": "base enemy_4",
+      "level": 4,
+      "hp": 21,
+      "hp_max": 21,
+      "attack": 10,
+      "defense": 4,
+      "speed": 3,
       "position": [
-        7,
-        1
+        8,
+        9
       ],
       "attacks": [
         {
@@ -138,7 +244,7 @@
           "precision": 80,
           "range": 1,
           "special_effect": null,
-          "base_damage": 8
+          "base_damage": 9
         }
       ],
       "is_boss": false,
