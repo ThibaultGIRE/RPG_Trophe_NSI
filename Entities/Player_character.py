@@ -1,7 +1,7 @@
 from Entities.Character import Personnage
 
 class PlayerCharacter(Personnage):
-    def __init__(self, name, level, hp, hp_max, attack, defense, speed, position, attacks, healer, special_attack):
+    def __init__(self, name, level, hp, hp_max, attack, defense, speed, position, attacks, healer=False, special_attack=None):
         """Initialize a PlayerCharacter instance
 
         Args:
@@ -28,7 +28,7 @@ class PlayerCharacter(Personnage):
             self.do_attack(target, self.special_attack)
 
     def can_double_attack(self, target):
-        """Check if the character can double attack
+        """Check if the character can double attack 
 
         Args:
             target (obj): represent the target character
