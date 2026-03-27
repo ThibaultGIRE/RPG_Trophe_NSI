@@ -3,10 +3,10 @@
 block_cipher = None
 
 a = Analysis(
-    ['main.py'],
+    ['sources/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('saves', 'saves')],  # Include saves folder
+    datas=[('sources/saves', 'saves')],  # Include saves folder
     hiddenimports=['arcade', 'pyglet'],
     hookspath=[],
     hooksconfig={},

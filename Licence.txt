@@ -1,0 +1,33 @@
+LICENCE LIBRE - RPG Tactique
+
+Ce projet est distribué sous les termes de la licence CeCILL-B, une licence libre qui permet l'utilisation, la modification et la redistribution du logiciel.
+
+AUTEURS:
+Thibault GIRARD-REYDET
+Julie GANIER JOSSE
+Nathan KETTERER
+
+CONTRIBUTION IA:
+Ce projet a bénéficié d'une assistance par intelligence artificielle pour certains aspects algorithmiques.
+L'IA a servi de support technique et pédagogique sans remplacer le développement humain.
+
+DROITS D'UTILISATION:
+- Utilisation libre à des fins éducatives et personnelles
+- Modification du code source permise
+- Redistribution autorisée sous les mêmes conditions
+- Commercialisation interdite sans accord préalable des auteurs
+
+RECONNAISSANCE:
+Toute utilisation ou modification de ce projet doit inclure une référence aux auteurs originaux
+et mentionner le concours de l'IA dans le développement.
+
+RESPONSABILITÉ:
+Ce logiciel est fourni "tel quel" sans aucune garantie. Les auteurs ne peuvent être tenus
+responsables des dommages directs ou indirects résultant de son utilisation.
+
+CONTACT:
+Pour toute question ou demande d'utilisation commerciale, veuillez contacter les auteurs.
+
+---
+Développé dans le cadre du Trophée NSI (Numérique et Sciences Informatiques)
+Année scolaire 2025-2026
