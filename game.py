@@ -663,16 +663,26 @@ class Game(arcade.Window):
     def _draw_menu(self):
         # Draw blue background
         arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
-        arcade.draw_text("The_Game", self.width / 2, self.height - 120, arcade.color.BLACK, 48, anchor_x="center", bold=True)
-        arcade.draw_text("Appuyez sur ENTRÉE pour lancer le jeu", self.width / 2, self.height - 200, arcade.color.BLACK, 24, anchor_x="center")
+        
+        # Calculate vertical center position
+        title_y = self.height / 2 + 40
+        subtitle_y = self.height / 2 - 20
+        
+        arcade.draw_text("The_Game", self.width / 2, title_y, arcade.color.DARK_JUNGLE_GREEN, 48, anchor_x="center", anchor_y="center", bold=True)
+        arcade.draw_text("Appuyez sur ENTRÉE pour lancer le jeu", self.width / 2, subtitle_y, arcade.color.DARK_JUNGLE_GREEN, 24, anchor_x="center", anchor_y="center")
 
     def _draw_tutorial(self):
         """Draw tutorial screen with game instructions."""
         # Draw blue background
         arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
         
-        title_y = self.height - 100
-        arcade.draw_text("BIENVENUE DANS THE_GAME !", self.width / 2, title_y, arcade.color.BLACK, 36, anchor_x="center", bold=True)
+        # Calculate total content height for centering
+        # Title + 80px gap + instructions (20 lines: 16 regular @ 25px, 4 empty @ 15px)
+        content_height = 80 + (16 * 25) + (4 * 15)  # = 540
+        
+        # Calculate starting Y position to center content
+        title_y = self.height / 2 + content_height / 2 - 40
+        arcade.draw_text("BIENVENUE DANS THE_GAME !", self.width / 2, title_y, arcade.color.DARK_JUNGLE_GREEN, 36, anchor_x="center", anchor_y="center", bold=True)
         
         instructions = [
             "CONTRÔLES DE BASE :",
@@ -702,20 +712,20 @@ class Game(arcade.Window):
         y_offset = title_y - 80
         for line in instructions:
             if "CONTRÔLES" in line or "LÉGENDE" in line:
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 18, anchor_x="center", bold=True)
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 18, anchor_x="center", anchor_y="center", bold=True)
             elif "BONNE CHANCE" in line:
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 20, anchor_x="center", bold=True)
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 20, anchor_x="center", anchor_y="center", bold=True)
             elif "ENTRÉE" in line and "Appuyez" in line:
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 18, anchor_x="center", bold=True)
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 18, anchor_x="center", anchor_y="center", bold=True)
             elif line.startswith("●"):
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
             elif line.startswith("■"):
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
             elif line == "":
                 y_offset -= 15
                 continue
             else:
-                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
             y_offset -= 25
 
     def _draw_load_menu(self):
@@ -723,18 +733,23 @@ class Game(arcade.Window):
         arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
         
         title = "Choisissez un emplacement de sauvegarde"
-        title_color = arcade.color.BLACK
+        title_color = arcade.color.DARK_JUNGLE_GREEN
         
         # Show delete mode indicator
         if self.deleting_slot == -1:
             title = "MODE SUPPRESSION - Appuyez sur 1, 2 ou 3"
-            title_color = arcade.color.BLACK
+            title_color = arcade.color.DARK_JUNGLE_GREEN
         
-        arcade.draw_text(title, self.width / 2, self.height - 120, title_color, 28, anchor_x="center")
+        # Calculate vertical center position for content
+        # Title at top center of content block
+        title_y = self.height / 2 + 60
+        arcade.draw_text(title, self.width / 2, title_y, title_color, 28, anchor_x="center", anchor_y="center")
         
+        # Save slots below title
+        slot_y_start = title_y - 50
         for slot in range(1, self.SAVE_SLOTS + 1):
             info = self._read_slot_info(slot)
-            y = self.height - 180 - slot * 40
+            y = slot_y_start - (slot - 1) * 40
             
             # Highlight slots in delete mode
             if self.deleting_slot == -1 and info:
@@ -748,14 +763,16 @@ class Game(arcade.Window):
             
             if info:
                 saved_at = info.get("saved_at", "?")
-                arcade.draw_text(f"{slot}) {info['name']} Nv {info['level']} PV {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.AZURE, 14, anchor_x="center")
+                arcade.draw_text(f"{slot}) {info['name']} Nv {info['level']} PV {info['hp']}/{info['hp_max']} XP {info['xp']} ({saved_at})", self.width / 2, y, arcade.color.DARK_JUNGLE_GREEN, 14, anchor_x="center", anchor_y="center")
             else:
-                arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.GRAY, 16, anchor_x="center")
+                arcade.draw_text(f"{slot}) Vide", self.width / 2, y, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
         
+        # Footer text at bottom center of content block
+        footer_y = slot_y_start - 150
         if self.deleting_slot == -1:
-            arcade.draw_text("1-3: Supprimer | D ou ÉCHAP: Annuler", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+            arcade.draw_text("1-3: Supprimer | D ou ÉCHAP: Annuler", self.width / 2, footer_y, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
         else:
-            arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ÉCHAP: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
+            arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ÉCHAP: Retour", self.width / 2, footer_y, arcade.color.DARK_JUNGLE_GREEN, 16, anchor_x="center", anchor_y="center")
 
     def _draw_save_menu(self):
         # Draw jade background
