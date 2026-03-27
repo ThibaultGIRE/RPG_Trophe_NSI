@@ -20,7 +20,7 @@ class Game(arcade.Window):
         self.map = GameMap(width=14, height=10, tile_width=64, tile_height=64, obstacle_count=18)
         screen_width = self.map.width * self.map.tile_width
         screen_height = self.map.height * self.map.tile_height
-        super().__init__(screen_width, screen_height, "Jeu RPG Tactique - Combat au Tour par Tour", resizable=True, fullscreen=True)
+        super().__init__(screen_width, screen_height, "The_Game", resizable=True, fullscreen=True)
 
         # Personnage jouable unique
         self.player = self.create_player()
@@ -40,7 +40,7 @@ class Game(arcade.Window):
         self.previous_phase = "exploration"
 
         # État du jeu
-        self.phase = "menu"  # "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
+        self.phase = "menu"  # "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat", "tutorial"
         self.in_combat = False
         
         # État de confirmation de suppression
@@ -128,7 +128,8 @@ class Game(arcade.Window):
             return None
 
     def _start_new_game(self):
-        self.phase = "exploration"
+        # Show tutorial first
+        self.phase = "tutorial"
         self.enemies = []
         self.tactical_combat = None
         self.exploration = None
@@ -155,7 +156,6 @@ class Game(arcade.Window):
                 start_x = 0
                 start_y += 1
         self.map.place_character(self.player, start_x, start_y)
-        self._start_exploration()
 
     def get_map_draw_info(self):
         # Reserve side panels during combat so the map doesn't get hidden behind UI boxes.
@@ -211,6 +211,10 @@ class Game(arcade.Window):
 
         if self.phase in ["victory", "defeat"]:
             self._draw_end_screen()
+            return
+
+        if self.phase == "tutorial":
+            self._draw_tutorial()
             return
 
         # Draw map and entities in available map space (reserve side panels in combat)
@@ -296,6 +300,12 @@ class Game(arcade.Window):
         )
 
     def _draw_end_screen(self):
+        # Draw background based on phase
+        if self.phase == "victory":
+            arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.BLUE)
+        else:
+            arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.DARK_RED)
+        
         message = "VICTOIRE !" if self.phase == "victory" else "DEFAITE"
         subtitle = "Appuyez sur Entrée pour recommencer." if self.phase == "victory" else "Appuyez sur Entrée pour relancer l'exploration."
         color = arcade.color.LIGHT_GREEN if self.phase == "victory" else arcade.color.LIGHT_CORAL
@@ -539,6 +549,7 @@ class Game(arcade.Window):
 
     def _start_exploration(self):
         """Start the exploration phase."""
+        self.phase = "exploration"
         self.exploration = ExplorationPhase(self.map, self.player)
         self.exploration.start_exploration()
 
@@ -616,25 +627,108 @@ class Game(arcade.Window):
 
         self.phase = "defeat"
 
+    def _restart_game(self):
+        """Restart the game after combat ends without showing tutorial."""
+        self.phase = "exploration"
+        self.enemies = []
+        self.tactical_combat = None
+        self.exploration = None
+        self.selected_action = None
+        self.highlighted_tiles = set()
+        self.save_message = ""
+        self.save_message_timer = 0.0
+        self.last_xp_gain = 0
+
+        self.player.hp = self.player.hp_max
+        self.map.entities.clear()
+        
+        # Regenerate heal station for new game
+        self.map.heal_station = None
+        self.map._generate_heal_station()
+        
+        # Reinitialize spawner to analyze obstacles
+        self.spawner.initialize_spawn_system()
+        
+        start_x, start_y = 0, 0
+        while not self.map.is_walkable(start_x, start_y):
+            start_x += 1
+            if start_x >= self.map.width:
+                start_x = 0
+                start_y += 1
+        self.map.place_character(self.player, start_x, start_y)
+
+        # Start exploration directly (skip tutorial)
+        self._start_exploration()
+
     def _draw_menu(self):
-        arcade.draw_text("Jeu RPG Tactique", self.width / 2, self.height - 120, arcade.color.WHITE, 36, anchor_x="center")
-        arcade.draw_text("Appuyez sur [ENTRÉE] pour démarrer", self.width / 2, self.height - 180, arcade.color.AZURE, 22, anchor_x="center")
-        arcade.draw_text("Appuyez sur [ÉCHAP] pour quitter", self.width / 2, self.height - 220, arcade.color.ORANGE, 20, anchor_x="center")
-        arcade.draw_text("S: Sauvegarder | L: Menu de chargement", self.width / 2, self.height - 260, arcade.color.LIGHT_GRAY, 16, anchor_x="center")
-        if self._any_save_exists():
-            arcade.draw_text("Sauvegardes existantes: appuyez sur [ENTRÉE] pour choisir un slot", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
-            arcade.draw_text("Dans le menu de chargement, 1-3 pour charger immédiatement (1 appui) ou N pour nouvelle partie", self.width / 2, self.height - 330, arcade.color.LIGHT_GRAY, 14, anchor_x="center")
-        else:
-            arcade.draw_text("Aucune sauvegarde trouvée. Appuyez sur [ENTRÉE] pour démarrer une nouvelle partie", self.width / 2, self.height - 300, arcade.color.AZURE, 14, anchor_x="center")
+        # Draw blue background
+        arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
+        arcade.draw_text("The_Game", self.width / 2, self.height - 120, arcade.color.BLACK, 48, anchor_x="center", bold=True)
+        arcade.draw_text("Appuyez sur ENTRÉE pour lancer le jeu", self.width / 2, self.height - 200, arcade.color.BLACK, 24, anchor_x="center")
+
+    def _draw_tutorial(self):
+        """Draw tutorial screen with game instructions."""
+        # Draw blue background
+        arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
+        
+        title_y = self.height - 100
+        arcade.draw_text("BIENVENUE DANS THE_GAME !", self.width / 2, title_y, arcade.color.BLACK, 36, anchor_x="center", bold=True)
+        
+        instructions = [
+            "CONTRÔLES DE BASE :",
+            "",
+            "M : Activer le mode déplacement (cases bleues)",
+            "   Utilisez les flèches du clavier pour vous déplacer",
+            "",
+            "A : Activer le mode attaque (cases rouges)",
+            "   Cliquez sur une case rouge pour attaquer un ennemi",
+            "",
+            "H : Se soigner (limité à 3 utilisations par combat)",
+            "",
+            "E : Finir votre tour (les ennemis joueront après)",
+            "",
+            "LÉGENDE :",
+            "● Bleu : Votre personnage",
+            "● Rouge : Ennemis normaux",
+            "● Violet : Boss ennemis",
+            "■ Gris : Obstacles (infranchissables)",
+            "● Vert : Stations de soin",
+            "",
+            "BONNE CHANCE !",
+            "",
+            "Appuyez sur ENTRÉE pour commencer"
+        ]
+        
+        y_offset = title_y - 80
+        for line in instructions:
+            if "CONTRÔLES" in line or "LÉGENDE" in line:
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 18, anchor_x="center", bold=True)
+            elif "BONNE CHANCE" in line:
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 20, anchor_x="center", bold=True)
+            elif "ENTRÉE" in line and "Appuyez" in line:
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 18, anchor_x="center", bold=True)
+            elif line.startswith("●"):
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+            elif line.startswith("■"):
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+            elif line == "":
+                y_offset -= 15
+                continue
+            else:
+                arcade.draw_text(line, self.width / 2, y_offset, arcade.color.BLACK, 16, anchor_x="center")
+            y_offset -= 25
 
     def _draw_load_menu(self):
+        # Draw jade background
+        arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
+        
         title = "Choisissez un emplacement de sauvegarde"
-        title_color = arcade.color.WHITE
+        title_color = arcade.color.BLACK
         
         # Show delete mode indicator
         if self.deleting_slot == -1:
             title = "MODE SUPPRESSION - Appuyez sur 1, 2 ou 3"
-            title_color = arcade.color.ORANGE
+            title_color = arcade.color.BLACK
         
         arcade.draw_text(title, self.width / 2, self.height - 120, title_color, 28, anchor_x="center")
         
@@ -649,7 +743,7 @@ class Game(arcade.Window):
                     right=self.width / 2 + 250,
                     bottom=y - 12,
                     top=y + 12,
-                    color=arcade.color.DARK_ORANGE
+                    color=arcade.color.LAVENDER_BLUE
                 )
             
             if info:
@@ -664,7 +758,10 @@ class Game(arcade.Window):
             arcade.draw_text("1-3: Charger | D: Mode suppression | N: Nouvelle partie | ÉCHAP: Retour", self.width / 2, 60, arcade.color.YELLOW, 16, anchor_x="center")
 
     def _draw_save_menu(self):
-        arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.WHITE, 28, anchor_x="center")
+        # Draw jade background
+        arcade.draw_lrbt_rectangle_filled(0, self.width, 0, self.height, arcade.color.JADE)
+        
+        arcade.draw_text("Enregistrer la partie : choisissez un slot", self.width / 2, self.height - 120, arcade.color.BLACK, 28, anchor_x="center")
         for slot in range(1, self.SAVE_SLOTS + 1):
             info = self._read_slot_info(slot)
             y = self.height - 180 - slot * 40
@@ -826,6 +923,7 @@ class Game(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         """Handle key press events."""
+        print(f"Key pressed: {key}, Current phase: {self.phase}")
         if key == arcade.key.ESCAPE:
             if self.phase in ["load_menu", "save_menu"]:
                 self.phase = "menu"
@@ -917,7 +1015,14 @@ class Game(arcade.Window):
 
         if self.phase in ["victory", "defeat"]:
             if key == arcade.key.ENTER or key == arcade.key.RETURN:
-                self._start_new_game()
+                self._restart_game()
+            return
+
+        if self.phase == "tutorial":
+            # Check for all possible Enter key variations (regular Enter and numpad Enter)
+            if key == arcade.key.ENTER or key == arcade.key.RETURN or key == arcade.key.NUM_ENTER:
+                print("Tutoriel : Touche Entrée détectée - Démarrage de l'exploration")
+                self._start_exploration()
             return
 
         if self.phase == "combat":
