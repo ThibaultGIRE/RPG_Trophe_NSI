@@ -26,12 +26,12 @@ class ExplorationPhase:
     def _generate_exploration_narrative(self):
         """Generate random exploration narrative messages."""
         narratives = [
-            "Exploring the area...",
-            "Moving through the terrain...",
-            "Searching for enemies...",
-            "Advancing cautiously...",
-            "Patrolling the region...",
-            "Scouting ahead...",
+            "Exploration de la zone...",
+            "A la recherche de nouvelles aventures...",
+            "En train de chercher des ennemis...",
+            "Vous pouvez utiliser les flèches directionelles au lieu de cliquer lors du déplacement ",
+            "La station de soins permet de récupérer la moitié des potions manquantes",
+            "N'oubliez pas de sauvegarder avant de quitter le jeu !",
         ]
         
         stats = [
