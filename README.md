@@ -418,7 +418,7 @@ Ce projet est à but éducatif et peut être utilisé librement pour l'apprentis
 
 ## 👨‍💻 Auteur
 
-Développé par Thibault GIRARD-REYDET, Julie GANIER et Nathan KETTERER avec l'assistance d'intelligence artificielle pour les aspects algorithmiques complexes.
+Développé par Thibault GIRARD-REYDET, Julie GANIER JOSSE et Nathan KETTERER avec l'assistance d'intelligence artificielle pour les aspects algorithmiques complexes.
 
 ---
 
