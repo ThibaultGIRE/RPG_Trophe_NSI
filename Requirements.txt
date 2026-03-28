@@ -1,0 +1,4 @@
+# Dépendances externes pour RPG Tactique
+# Installez avec: pip install -r Requirements.txt
+
+arcade>=2.6.0

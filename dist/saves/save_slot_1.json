@@ -1,0 +1,22 @@
+{
+  "saved_at": "2026-03-27 10:57:44",
+  "player": {
+    "name": "Hero",
+    "level": 4,
+    "hp": 22,
+    "hp_max": 22,
+    "attack": 8,
+    "defense": 5,
+    "speed": 9,
+    "xp": 1300,
+    "attacks": [
+      {
+        "name": "Sword",
+        "precision": 85,
+        "range": 1,
+        "special_effect": null,
+        "base_damage": 8
+      }
+    ]
+  }
+}
