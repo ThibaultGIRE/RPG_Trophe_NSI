@@ -35,7 +35,8 @@ class Game(arcade.Window):
 
         # Système de sauvegarde
         self.SAVE_SLOTS = 3
-        self.save_folder = os.path.join(os.getcwd(), "saves")
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.save_folder = os.path.join(project_root, "data", "saves")
         self._ensure_save_folder()
         self.previous_phase = "exploration"
 

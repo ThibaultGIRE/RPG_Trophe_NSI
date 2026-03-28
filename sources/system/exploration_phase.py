@@ -35,9 +35,9 @@ class ExplorationPhase:
         ]
         
         stats = [
-            f"{self.player.name} gains experience from the journey.",
-            f"{self.player.name} finds supplies along the way.",
-            f"{self.player.name} feels stronger.",
+            f"{self.player.name} a gagné de l'expérience.",
+            f"{self.player.name} trouve des fournitures en chemin.",
+            f"{self.player.name} se sent plus fort.",
         ]
         
         self.action_log.append(random.choice(narratives))
