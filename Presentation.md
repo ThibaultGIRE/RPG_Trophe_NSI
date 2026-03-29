@@ -6,82 +6,51 @@ Un jeu de rôle tactique développé en Python utilisant la bibliothèque Arcade
 
 Ce projet est un jeu de rôle tactique inspiré des classiques du genre comme Fire Emblem ou Final Fantasy Tactics. Le joueur contrôle un héros qui explore une carte, combat des ennemis, gagne de l'expérience et progresse en niveaux.
 
-### Aspects techniques majeurs
+**Objectif du projet :** Créer un jeu tactique complet avec une interface graphique fluide, un système de combat équilibré et une intelligence artificielle compétitive, tout en démontrant la maîtrise de concepts avancés de programmation (POO, algorithmes, structures de données).
 
-Le projet intègre plusieurs systèmes complexes qui ont bénéficié d'une assistance IA pour leur développement et leur optimisation :
+## 👥 Répartition du travail
 
-1. **Système de combat tactique** : Gestion des tours, calculs de dégâts, système de mouvement sur grille
-2. **Intelligence artificielle des ennemis** : Pathfinding, prise de décision tactique
-3. **Système de sauvegarde/chargement** : Persistance des données avec JSON
-4. **Génération procédurale de cartes** : Placement aléatoire d'obstacles et de points d'intérêt
-5. **Interface utilisateur complexe** : Panneaux d'information, indicateurs visuels, menus
+Le développement du projet a été réparti entre les trois membres de l'équipe selon leurs compétences et intérêts :
 
-## ✨ Fonctionnalités
+### Thibault GIRARD-REYDET
+- **Gestion des sauvegarde** : Implémentation du système de persistance avec JSON, gestion des 3 slots de sauvegarde, interface de sauvegarde/chargement
+- **Interface graphique** : Conception et implémentation de l'interface utilisateur, panneaux d'information, indicateurs visuels, menus interactifs, bannières de transition
 
-### Gameplay
-- 🗺️ **Exploration** : Phase d'exploration avant chaque combat
-- ⚔️ **Combat tactique** : Système au tour par tour avec grille
-- 📈 **Progression** : Système d'expérience et de niveaux
-- 💾 **Sauvegarde** : 3 emplacements de sauvegarde avec suppression
-- 🧪 **Soin** : Stations de soin et potions de soin limitées
+### Nathan KETTERER
+- **Système de niveau** : Création du système d'expérience et de progression, calcul des statistiques par niveau, équilibrage des courbes de progression
+- **Spawn des mobs** : Implémentation du générateur d'ennemis, gestion des vagues, création des boss, algorithme de placement des ennemis
+- **Évolution de l'XP** : Formules de calcul d'expérience, récompenses de victoire, gestion de la progression du joueur
 
-### Combat
-- 🎯 **Mouvement stratégique** : Déplacement sur 5 cases par tour
-- 💥 **Attaques variées** : Attaques de mêlée avec précision et critique
-- 🤖 **IA ennemie** : Les ennemis poursuivent et attaquent intelligemment
-- 🏆 **Boss** : Ennemis plus puissants avec statistiques augmentées
+### Julie GANIER JOSSE
+- **Intelligence Artificielle** : Développement de l'IA des ennemis, implémentation du pathfinding, heuristiques de décision, algorithmes de poursuite et d'attaque
+- **Génération de la carte** : Création procédurale des cartes, placement aléatoire des obstacles, génération des stations de soin, algorithme de validité des positions
 
-### Interface
-- 📊 **Panneaux d'information** : Stats en temps réel du héros
-- 🎨 **Indicateurs visuels** : Surbrillance des cases accessibles
-- 📋 **Menus de sauvegarde/chargement** : Interface intuitive
-- 🖼️ **Bannières de tour** : Affichage des transitions de tour
+### Collaboration
+Bien que chaque membre ait eu des responsabilités principales, le développement a été collaborative avec :
+- Revues de code régulières entre les membres
+- Intégration et tests des différents systèmes
+- Résolution conjointe des problèmes complexes
+- Documentation partagée du code
 
-## 🏗️ Architecture du projet
+## 🏗️ Architecture logicielle
 
-```
-RPG_Trophe_NSI/
-├── Presentation.md         # Description du projet
-├── README.md               # Protocole d'utilisation
-├── Licence.txt             # Licence du projet
-├── Requirements.txt         # Dépendances
-├── sources/                # Code source
-│   ├── main.py             # Point d'entrée
-│   ├── game.py             # Classe principale Game
-│   ├── Combat/             # Système de combat
-│   │   ├── tactical_combat.py
-│   │   ├── combat_manager.py
-│   │   └── action_manager.py
-│   ├── Entities/           # Entités du jeu
-│   │   ├── Character.py
-│   │   ├── Player_character.py
-│   │   ├── Ennemy.py
-│   │   └── Attack.py
-│   ├── Map/                # Système de carte
-│   │   └── game_map.py
-│   ├── system/             # Systèmes du jeu
-│   │   ├── ai_controller.py
-│   │   ├── enemy_spawner.py
-│   │   ├── xp_system.py
-│   │   └── exploration_phase.py
-│   └── saves/              # Dossier des sauvegardes
-│       ├── save_slot_1.json
-│       ├── save_slot_2.json
-│       └── save_slot_3.json
-```
+### Structures de données
 
-## 🤖 Contribution de l'IA au développement
+Le projet utilise plusieurs structures de données fondamentales :
 
-Ce projet a bénéficié d'une assistance par intelligence artificielle pour plusieurs aspects complexes de son développement. L'IA a servi de catalyseur pour résoudre des problèmes algorithmiques et architecturaux, permettant une implémentation plus rapide et robuste.
+1. **Listes** : Gestion des collections d'ennemis, attaques disponibles, statistiques
+2. **Dictionnaires** : Sauvegarde/chargement des données, mapping des positions sur la carte
+3. **Ensembles (Sets)** : Gestion des obstacles, cases visitées, positions occupées
+4. **Tuples** : Représentation des positions (x, y), coordonnées sur la grille
+5. **Files (deque)** : Algorithme BFS pour le pathfinding et le calcul de mouvement
 
-### 1. Système de Pathfinding et de Mouvement
+### Algorithmes principaux
 
-**Défi** : Implémenter un système de mouvement efficace sur grille avec gestion des obstacles et calcul de portée.
+#### 1. Pathfinding et calcul de mouvement (BFS)
 
-**Solution IA** :
-- **Algorithme BFS (Breadth-First Search)** : Implémentation d'un parcours en largeur pour calculer les cases accessibles dans un rayon de mouvement donné
-- **Optimisation de la file d'attente** : Utilisation de `collections.deque` pour une gestion efficace des positions à explorer
-- **Gestion des états visités** : Éviter les boucles infinies et recalculs inutiles
+**Problème :** Calculer les cases accessibles dans un rayon de mouvement donné en évitant les obstacles.
+
+**Solution :** Algorithme de parcours en largeur (Breadth-First Search)
 
 ```python
 # Exemple dans tactical_combat.py - get_movement_tiles()
@@ -99,30 +68,26 @@ while queue:
                 queue.append(((nx, ny), distance + 1))
 ```
 
-**Complexité algorithmique** : O(n²) où n est le rayon de mouvement
+**Complexité algorithmique :** O(n²) où n est le rayon de mouvement
 
-### 2. Intelligence Artificielle des Ennemis
+#### 2. Intelligence Artificielle des ennemis
 
-**Défi** : Créer une IA d'ennemis capable de prendre des décisions tactiques (poursuite, attaque, évitement).
+**Problème :** Créer une IA capable de prendre des décisions tactiques (poursuite, attaque, évitement).
 
-**Solution IA** :
-- **Heuristique de distance** : Priorisation des cibles les plus faibles en points de vie
-- **Algorithme de poursuite** : Mouvement en direction du joueur avec gestion des obstacles
-- **Arbre de décision simple** : Attaquer si à portée, sinon se rapprocher
+**Solution :** Heuristique de distance + arbre de décision simple
 
 ```python
-# Exemple dans ai_controller.py
+# Sélection de la cible optimale (plus faible en PV)
 @staticmethod
 def get_best_target(enemy, players):
-    """Sélectionne la cible optimale (plus faible)"""
     alive_players = [player for player in players if player.is_alive()]
     if not alive_players:
         return None
     return min(alive_players, key=lambda player: player.hp)
 
+# Mouvement vers la cible avec gestion des obstacles
 @staticmethod
 def move_towards(enemy, target, game_map):
-    """Calcul le mouvement optimal vers la cible"""
     ex, ey = enemy.position
     tx, ty = target.position
 
@@ -138,48 +103,41 @@ def move_towards(enemy, target, game_map):
     return enemy.position
 ```
 
-### 3. Système de Calcul de Dégâts
+#### 3. Calcul de dégâts avec RNG
 
-**Défi** : Implémenter un système de combat équilibré avec précision, critique et dégâts variables.
+**Problème :** Implémenter un système de combat équilibré avec précision, critique et dégâts variables.
 
-**Solution IA** :
-- **Formules probabilistes** : Calcul de chances de toucher et de critique basées sur les statistiques
-- **Système de RNG** : Utilisation de générateurs aléatoires pour la variabilité
-- **Équilibrage mathématique** : Formules de dégâts avec plafonds et planchers
+**Solution :** Formules probabilistes avec générateurs aléatoires
 
 ```python
-# Exemple dans tactical_combat.py
+# Calcul si l'attaque touche
 def _roll_hit(self, attacker, defender):
-    """Calcule si l'attaque touche"""
     hit_chance = 90 - 2 * (defender.speed - attacker.speed)
     hit_chance = max(10, min(95, hit_chance))
     return random.randint(1, 100) <= hit_chance
 
+# Calcul si c'est un coup critique
 def _roll_crit(self, attacker, defender):
-    """Calcule si c'est un coup critique"""
     crit_chance = 5 + (attacker.level - defender.level)
     crit_chance = max(0, min(40, crit_chance))
     return random.randint(1, 100) <= crit_chance
 
+# Calcul des dégâts de base
 def _calculate_damage(self, attacker, defender):
-    """Calcule les dégâts de base"""
     base_damage = attacker.attacks[0].base_damage if attacker.attacks else 5
     raw_damage = base_damage + attacker.attack - defender.defense
     return max(1, raw_damage)
 ```
 
-### 4. Gestion d'État Complexes
+#### 4. Machine à états pour la gestion du jeu
 
-**Défi** : Gérer les transitions entre différentes phases du jeu (menu, exploration, combat, sauvegarde) avec préservation de l'état.
+**Problème :** Gérer les transitions entre différentes phases du jeu (menu, exploration, combat, sauvegarde) avec préservation de l'état.
 
-**Solution IA** :
-- **Machine à états** : Implémentation claire des transitions entre phases
-- **Pattern Observer** : Système de notifications pour les changements d'état
-- **Gestion de l'historique** : Sauvegarde de la phase précédente pour les menus
+**Solution :** Machine à états avec sauvegarde de l'état précédent
 
 ```python
-# Exemple dans game.py
-self.phase = "menu"  # États possibles: "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
+# États possibles: "menu", "exploration", "combat", "load_menu", "save_menu", "victory", "defeat"
+self.phase = "menu"
 self.previous_phase = "exploration"
 
 def on_key_press(self, key, modifiers):
@@ -188,77 +146,23 @@ def on_key_press(self, key, modifiers):
         self.phase = "save_menu"
 ```
 
-### 5. Système de Rendu Adaptatif
+#### 5. Génération procédurale de carte
 
-**Défi** : Adapter l'affichage de la carte à différentes résolutions d'écran tout en maintenant la proportion.
+**Problème :** Générer des cartes jouables avec obstacles et points d'intérêt de manière aléatoire mais cohérente.
 
-**Solution IA** :
-- **Calcul d'échelle automatique** : Détermination du facteur de zoom optimal
-- **Centrage dynamique** : Calcul automatique des offsets pour centrer la carte
-- **Gestion de l'espace** : Répartition intelligente de l'espace entre la carte et l'UI
+**Solution :** Algorithme de placement aléatoire avec fallback intelligent
 
 ```python
-# Exemple dans game_map.py - get_draw_info()
-scale_x = draw_width / (self.width * self.tile_width)
-scale_y = draw_height / (total_rows * self.tile_height)
-scale = min(scale_x, scale_y)  # Conserver le ratio d'aspect
-
-tile_w = self.tile_width * scale
-tile_h = self.tile_height * scale
-
-# Centrage de la carte dans l'espace disponible
-offset_x = origin_x + (draw_width - total_width) / 2
-offset_y = origin_y + (draw_height - total_height) / 2
-```
-
-### 6. Système de Sauvegarde Robuste
-
-**Défi** : Implémenter un système de sauvegarde/chargement fiable avec gestion des erreurs et validation.
-
-**Solution IA** :
-- **Sérialisation JSON** : Utilisation de JSON pour la persistance des données
-- **Gestion d'erreurs** : Try/except pour les opérations de fichier
-- **Validation de données** : Vérification de l'intégrité des sauvegardes
-- **Fallbacks** : Valeurs par défaut en cas de données manquantes
-
-```python
-# Exemple dans game.py
-def save_game(self, slot):
-    save_data = {
-        "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "player": {
-            "name": self.player.name,
-            "level": self.player.level,
-            # ... autres statistiques
-        },
-    }
-    try:
-        with open(slot_path, "w", encoding="utf-8") as f:
-            json.dump(save_data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        self.save_message = f"Erreur lors de la sauvegarde: {e}"
-```
-
-### 7. Génération Procédurale de Carte
-
-**Défi** : Générer des cartes jouables avec obstacles et points d'intérêt de manière aléatoire mais cohérente.
-
-**Solution IA** :
-- **Algorithme de placement aléatoire** : Génération d'obstacles avec vérification de collision
-- **Heuristique de validité** : Tentatives multiples avec fallback
-- **Équilibrage de densité** : Contrôle du nombre d'obstacles par rapport à la taille de la carte
-
-```python
-# Exemple dans game_map.py
+# Génération d'obstacles
 def _generate_obstacles(self, obstacle_count):
     for _ in range(obstacle_count):
         x = random.randint(0, self.width - 1)
         y = random.randint(0, self.height - 1)
-        if (x, y) not in self.obstacles:  # Éviter les doublons
+        if (x, y) not in self.obstacles:
             self.obstacles.add((x, y))
 
+# Génération avec fallback
 def _generate_heal_station(self):
-    """Génération avec fallback intelligent"""
     for _ in range(100):  # 100 tentatives
         x = random.randint(0, self.width - 1)
         y = random.randint(0, self.height - 1)
@@ -269,80 +173,284 @@ def _generate_heal_station(self):
     self.heal_station = (self.width // 2, self.height // 2)
 ```
 
-### Bénéfices de l'Assistance IA
+### Programmation Orientée Objet (POO)
 
-1. **Rapidité de développement** : Les algorithmes complexes ont été implémentés plus rapidement avec des patterns éprouvés
-2. **Robustesse** : Les solutions proposées incluent souvent la gestion des cas limites et des erreurs
-3. **Optimisation** : Utilisation de structures de données et d'algorithmes optimaux (deque, BFS, etc.)
-4. **Maintenabilité** : Code structuré et documenté, facilitant les futures modifications
-5. **Apprentissage** : L'assistance IA a permis d'explorer des approches algorithmiques avancées
+Le projet utilise largement la POO avec une hiérarchie de classes claire :
 
-### Approche Collaborative
+#### Hiérarchie des classes
 
-L'IA a servi de **guide et d'assistant** plutôt que de remplaçant :
+```
+Character (classe abstraite)
+├── PlayerCharacter
+└── Enemy
+```
 
-- ✅ **Génération de code initial** pour les algorithmes complexes
-- ✅ **Suggestions d'optimisation** et de refactoring
-- ✅ **Documentation et explications** des concepts algorithmiques
-- ✅ **Débogage assisté** pour identifier les problèmes logiques
-- ❌ **Non** : Remplacement total du développement humain
-- ❌ **Non** : Décisions de design sans validation humaine
+#### Classes principales
 
-Le développeur reste au contrôle de l'architecture, des décisions de design et de la validation des fonctionnalités, l'IA servant à accélérer l'implémentation et à proposer des solutions optimisées.
+1. **Game** (`sources/game.py`) : Classe principale gérant la fenêtre, les boucles de rendu et les événements
+2. **TacticalCombat** (`sources/Combat/tactical_combat.py`) : Gère le système de combat au tour par tour
+3. **GameMap** (`sources/Map/game_map.py`) : Gère la carte, le rendu, les obstacles et les entités
+4. **Character** (`sources/Entities/Character.py`) : Classe de base pour les personnages
+5. **PlayerCharacter** (`sources/Entities/Player_character.py`) : Spécialisation pour le héros
+6. **Enemy** (`sources/Entities/Ennemy.py`) : Spécialisation pour les ennemis
+7. **AIController** (`sources/system/ai_controller.py`) : Contient la logique de décision IA
+8. **XpSystem** (`sources/system/xp_system.py`) : Gestion de l'expérience et des niveaux
+9. **EnnemySpawner** (`sources/system/enemy_spawner.py`) : Génération des vagues d'ennemis
 
-## 📚 Structure du code
+#### Principes POO appliqués
 
-### Classes principales
+- **Encapsulation** : Attributs privés avec getters/setters
+- **Héritage** : Character → PlayerCharacter et Enemy
+- **Polymorphisme** : Méthodes redéfinies selon le type d'entité
+- **Abstraction** : Classes abstraites pour définir des interfaces communes
+
+## 💥 Difficultés rencontrées
+
+### 1. Pathfinding sur grille avec obstacles
+
+**Défi :** Implémenter un système de mouvement efficace permettant au joueur et à l'IA de se déplacer intelligemment sur une grille avec des obstacles.
+
+**Problème initial :** Les premières implémentations utilisaient des itérations simples qui ne tenaient pas compte des obstacles, provoquant des déplacements impossibles et des bugs graphiques.
+
+**Solution adoptée :** 
+- Implémentation de l'algorithme BFS (Breadth-First Search)
+- Utilisation d'un set pour les positions visitées afin d'éviter les boucles infinies
+- Utilisation de `collections.deque` pour une gestion efficace de la file d'attente
+- Séparation claire entre calcul de portée et affichage
+
+**Ce qui a été appris :** L'importance de choisir le bon algorithme de pathfinding selon le contexte. BFS est optimal pour les graphes non pondérés comme une grille de mouvement.
+
+### 2. Intelligence Artificielle des ennemis
+
+**Défi :** Créer une IA d'ennemis capable de prendre des décisions tactiques crédibles sans être trop prévisible ni trop difficile.
+
+**Problèmes rencontrés :**
+- Les ennemis restaient bloqués derrière les obstacles
+- L'IA attaquait systématiquement le joueur le plus proche, même s'il était trop puissant
+- Les ennemis ne priorisaient pas les cases les plus stratégiques
+
+**Solution adoptée :**
+- Implémentation d'une heuristique de ciblage : attaquer le personnage avec le moins de PV
+- Algorithme de poursuite simple mais efficace avec gestion des obstacles
+- Arbre de décision : vérifier si attaque possible → sinon se rapprocher → sinon attendre
+- Ajout d'une marge de randomisation pour éviter la prévisibilité totale
+
+**Ce qui a été appris :** L'équilibre entre complexité et performance en IA. Une IA trop complexe peut rendre le jeu injouable, tandis qu'une IA trop simple le rend ennuyeux.
+
+### 3. Gestion d'état complexe avec préservation
+
+**Défi :** Gérer les nombreuses transitions entre phases du jeu (menu, exploration, combat, sauvegarde, chargement, victoire, défaite) tout en préservant l'état lors des interactions.
+
+**Problèmes rencontrés :**
+- Le jeu se figeait après être revenu d'un menu
+- L'état du combat n'était pas préservé lors de la sauvegarde
+- Les transitions entre phases créaient des bugs visuels et fonctionnels
+
+**Solution adoptée :**
+- Implémentation d'une machine à états avec sauvegarde de l'état précédent (`previous_phase`)
+- Séparation claire des responsabilités entre phases
+- Utilisation de flags pour gérer les transitions
+- Tests approfondis de chaque transition possible
+
+**Ce qui a été appris :** L'importance d'une architecture claire pour la gestion d'état. La machine à états permet de visualiser et de contrôler facilement les transitions.
+
+### 4. Système de sauvegarde robuste
+
+**Défi :** Implémenter un système de sauvegarde/chargement fiable capable de préserver tout l'état du jeu (position, statistiques, ennemis, phase).
+
+**Problèmes rencontrés :**
+- Les sauvegardes corrompues créaient des crashs du jeu
+- Certaines données n'étaient pas sérialisables en JSON
+- Le chargement ne restaure pas l'état exact (position des ennemis, phase de combat)
+
+**Solution adoptée :**
+- Utilisation de JSON pour la sérialisation (portabilité et lisibilité)
+- Gestion d'erreurs avec try/except pour toutes les opérations de fichier
+- Validation des données chargées avec valeurs par défaut en cas de données manquantes
+- Sérialisation explicite de chaque attribut important
+- Horodatage des sauvegardes pour information utilisateur
+
+**Ce qui a été appris :** La robustesse est cruciale dans les systèmes de persistance. Il faut toujours anticiper les cas d'erreur et prévoir des fallbacks.
+
+### 5. Rendu adaptatif à différentes résolutions
+
+**Défi :** Adapter l'affichage de la carte à différentes résolutions d'écran tout en maintenant la proportion et la lisibilité.
+
+**Problèmes rencontrés :**
+- La carte était déformée sur certains écrans
+- Les éléments de l'UI se chevauchaient ou sortaient de l'écran
+- Le zoom n'était pas proportionnel
+
+**Solution adoptée :**
+- Calcul automatique du facteur de zoom optimal : `scale = min(scale_x, scale_y)`
+- Centrage dynamique de la carte dans l'espace disponible
+- Gestion intelligente de l'espace entre la carte et l'UI
+- Utilisation de valeurs relatives (%) plutôt qu'absolues (pixels)
+
+**Ce qui a été appris :** L'adaptabilité est essentielle pour les interfaces graphiques modernes. Le responsive design permet de garantir une bonne expérience utilisateur sur différents équipements.
+
+### 6. Équilibrage du système de combat
+
+**Défi :** Créer un système de combat équilibré qui ne soit ni trop facile ni trop difficile, avec une courbe de progression satisfaisante.
+
+**Problèmes rencontrés :**
+- Le joueur gagnait trop facilement les premiers combats
+- Les ennemis devenaient trop forts trop vite
+- Les formules de dégâts produisaient des résultats imprévisibles
+- Les chances de critique étaient trop fréquentes ou trop rares
+
+**Solution adoptée :**
+- Tests itératifs avec ajustement progressif des paramètres
+- Plafonds et planchers pour les formules (ex: hit_chance entre 10% et 95%)
+- Courbe de progression non linéaire pour les statistiques
+- Introduction des boss avec statistiques augmentées pour les combats clés
+
+**Ce qui a été appris :** L'équilibrage de jeu est un processus itératif qui nécessite de nombreux tests et ajustements. Il n'y a pas de formule parfaite, mais un équilibre satisfaisant trouvé par l'expérience.
+
+## 🤖 Contribution de l'Intelligence Artificielle au développement
+
+Ce projet a bénéficié d'une assistance par intelligence artificielle pour plusieurs aspects complexes de son développement. L'IA a servi de catalyseur pour résoudre des problèmes algorithmiques et architecturaux.
+
+### Outils et approche
+
+L'IA a été utilisée de manière collaborative comme :
+- **Guide technique** pour explorer des approches algorithmiques avancées
+- **Assistant de débogage** pour identifier les problèmes logiques
+- **Source de patterns** pour des solutions optimisées et éprouvées
+- **Assistant de documentation** pour expliquer les concepts
+
+### Bénéfices de l'assistance IA
+
+1. **Rapidité de développement** : Les algorithmes complexes ont été implémentés plus rapidement
+2. **Robustesse** : Les solutions incluent souvent la gestion des cas limites
+3. **Optimisation** : Utilisation de structures de données et d'algorithmes optimaux (deque, BFS)
+4. **Maintenabilité** : Code structuré facilitant les futures modifications
+5. **Apprentissage** : Découverte de concepts algorithmiques avancés
+
+### Limites et rôle humain
+
+L'IA n'a pas remplacé le développement humain mais l'a assisté :
+- ✅ Génération de code initial pour les algorithmes complexes
+- ✅ Suggestions d'optimisation et de refactoring
+- ✅ Documentation des concepts algorithmiques
+- ❌ Non : Remplacement total du développement
+- ❌ Non : Décisions de design sans validation humaine
+
+Le développeur reste au contrôle de l'architecture, des décisions de design et de la validation des fonctionnalités.
+
+## 📚 Structure du code détaillée
+
+### Classes principales et leurs responsabilités
 
 #### `Game` (sources/game.py)
-Classe principale gérant la fenêtre du jeu et les boucles de rendu.
+Classe principale héritant de `arcade.Window`, gérant :
+- La fenêtre et les boucles de rendu
+- Les événements clavier et souris
+- Les transitions entre phases
+- L'affichage de l'interface utilisateur
+- La coordination des différents systèmes
 
 #### `TacticalCombat` (sources/Combat/tactical_combat.py)
-Gère le système de combat au tour par tour, les calculs de dégâts et l'IA des ennemis.
+Gère le système de combat :
+- Calcul des dégâts (hit, crit, damage)
+- Gestion des tours (joueur/ennemi)
+- Pathfinding pour le mouvement
+- Coordination avec l'IA ennemie
 
 #### `GameMap` (sources/Map/game_map.py)
-Gère la carte, le rendu, les obstacles et les entités.
+Gère la carte et le rendu :
+- Génération procédurale des cartes
+- Placement des obstacles et stations de soin
+- Rendu adaptatif avec zoom automatique
+- Gestion des entités sur la carte
 
 #### `PlayerCharacter` (sources/Entities/Player_character.py)
-Représente le personnage jouable avec ses statistiques et capacités.
+Représente le héros :
+- Statistiques (PV, attaque, défense, vitesse)
+- Inventaire (potions de soin)
+- Gestion de l'expérience et des niveaux
+- Attaques disponibles
 
 #### `Enemy` (sources/Entities/Ennemy.py)
-Représente les ennemis avec leur propre IA.
+Représente les ennemis :
+- Statistiques individuelles
+- Type (normal/boss)
+- IA intégrée pour les décisions
+- Gestion de la mort et des récompenses
 
 #### `AIController` (sources/system/ai_controller.py)
-Contient la logique de décision pour les ennemis.
+Contient la logique de décision IA :
+- Sélection de la cible optimale
+- Calcul du mouvement vers la cible
+- Prise de décision (attaquer/se déplacer)
+- Gestion de la priorité des actions
 
-### Systèmes auxiliaires
+#### `XpSystem` (sources/system/xp_system.py)
+Gère la progression :
+- Calcul de l'expérience gagnée
+- Passage de niveau avec augmentation des stats
+- Courbe de progression non linéaire
+- Formules d'équilibre
 
-- `XpSystem` : Gestion de l'expérience et des niveaux
-- `Ennemy_Spawner` : Génération des vagues d'ennemis
-- `ExplorationPhase` : Phase d'exploration pré-combat
+#### `EnnemySpawner` (sources/system/enemy_spawner.py)
+Génère les vagues d'ennemis :
+- Création des ennemis normaux
+- Génération des boss (plus puissants)
+- Placement stratégique sur la carte
+- Équilibrage des difficultés
 
-## 🚀 Améliorations futures
+## 🚀 Évolutions possibles
 
-- [ ] Ajout de plus de types d'ennemis
-- [ ] Système d'équipement et d'objets
-- [ ] Plusieurs classes de personnages jouables
-- [ ] Cartes plus grandes et plus variées
-- [ ] Mode multijoueur
-- [ ] Effets visuels améliorés
-- [ ] Son et musique
-- [ ] Système de quêtes
+Si nous avions eu plus de temps, nous aurions souhaité implémenter :
+
+### Fonctionnalités de gameplay
+- **Plusieurs classes de personnages** : Guerrier, Mage, Archer avec compétences uniques
+- **Système d'équipement** : Armes, armures, accessoires avec statistiques variables
+- **Plusieurs types d'ennemis** : Variété dans les comportements et les capacités
+- **Compétences spéciales** : Pouvoirs uniques avec cooldowns et effets
+- **Éléments** : Feu, eau, terre avec interactions entre eux
+
+### Cartes et environnement
+- **Cartes plus grandes et plus variées** : Différents biomes (forêt, désert, donjon)
+- **Environnements interactifs** : Pièges, téléporteurs, zones de bonus
+- **Météo dynamique** : Conditions affectant les combats
+- **Bâtiments et structures** : Points de contrôle, tours défensives
+
+### Multijoueur
+- **Mode multijoueur local** : 2 joueurs sur le même écran
+- **Mode multijoueur en ligne** : Combats PVP ou coopératif
+- **Système de classement** : Scoreboard et ladders
+
+### Interface et expérience utilisateur
+- **Effets visuels améliorés** : Animations d'attaque, particules, shake
+- **Son et musique** : Bande-son dynamique et effets sonores
+- **Interface personnalisable** : Options graphiques et contrôles
+- **Tutoriel interactif** : Introduction guidée pour les nouveaux joueurs
+
+### Systèmes avancés
+- **Système de quêtes** : Missions secondaires avec récompenses
+- **Histoire et narration** : Scénario avec dialogues et choix
+- **Crafting** : Fabrication d'objets et d'équipement
+- **Système de réputation** : Relations avec différentes factions
 
 ## 📝 Notes de développement
 
 Ce projet a été développé dans le cadre du Trophée NSI (Numérique et Sciences Informatiques). Il démontre l'application de concepts avancés de programmation :
 
-- Programmation orientée objet
-- Algorithmes et structures de données
-- Intelligence artificielle basique
-- Gestion d'état et événements
-- Persistance des données
-- Interface graphique
+- **Programmation orientée objet** : Héritage, encapsulation, polymorphisme
+- **Algorithmes et structures de données** : BFS, pathfinding, graphs, files
+- **Intelligence artificielle basique** : Heuristiques, arbres de décision
+- **Gestion d'état et événements** : Machine à états, observers
+- **Persistance des données** : JSON, sérialisation
+- **Interface graphique** : Arcade, rendu 2D, événements utilisateur
 
-## 👨‍💻 Auteurs
+## 📞 Contact
 
-Développé par Thibault GIRARD-REYDET, Julie GANIER JOSSE et Nathan KETTERER avec l'assistance d'intelligence artificielle pour les aspects algorithmiques complexes.
+Pour toute question ou problème concernant le projet :
+
+- Thibault GIRARD-REYDET
+- Julie GANIER JOSSE
+- Nathan KETTERER
 
 ---
 
